@@ -11,6 +11,7 @@ CONFIG -= app_bundle
 
 SOURCES += \
         controlbeacon.cpp \
+        hydroacoustics.cpp \
         logger.cpp \
         main.cpp \
         nmea0183.cpp
@@ -22,5 +23,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     controlbeacon.h \
+    hydroacoustics.h \
     logger.h \
     nmea0183.h

@@ -41,7 +41,7 @@ void NMEA0183::parseBuffer()
     //    qDebug() << "endSimvol:    " << end;
         QByteArray tmp = gps_buffer.mid(index+1, 5);
         qDebug() << tmp;
-        if (tmp == GPRMC)
+        if ((tmp == GPRMC) or (tmp == "GNRMC"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -65,7 +65,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPVTG)
+        if ((tmp == GPVTG) or (tmp == "GNVTG"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -88,7 +88,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPTXT)
+        if ((tmp == GPTXT) or (tmp == "GNTXT"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -112,7 +112,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPGGA)
+        if ((tmp == GPGGA) or (tmp == "GNGGA"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -137,7 +137,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPGSA)
+        if ((tmp == GPGSA) or (tmp == "GNGSA"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -160,7 +160,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPGSV)
+        if ((tmp == GPGSV) or (tmp == "GNGSV"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -183,7 +183,7 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
-        if (tmp == GPGLL)
+        if ((tmp == GPGLL) or (tmp == "GNGLL"))
         {
             QByteArray msg = gps_buffer.mid(index+1, crc_in-1);
             int crc_real = 0;
@@ -206,6 +206,8 @@ void NMEA0183::parseBuffer()
                 gps_buffer.remove(0, end);
             }
         }
+
+        gps_buffer.remove(0, end);
         qDebug() << "gps_buffer.size:   " << gps_buffer.size();
     }
 }

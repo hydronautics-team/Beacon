@@ -5,11 +5,12 @@ Logger::Logger(QObject *parent) : QObject{parent}
 
 }
 
-void Logger::logTick(GPS gps)
+void Logger::logTickGPS(GPS gps)
 {
-    if (writeLog)
+    if (writeLogGPS)
     {
-        QTextStream stream (&file);
+        gpsS = gps;
+        QTextStream stream (&fileGPS);
 //        stream << gps.gll.lat << ", " << gps.gll.NS << ", " << gps.gll.long_ << ", " << gps.gll.EW << ", " << \
 //                  gps.gll.time.toString("hh:mm:ss.z") << ", " << gps.gll.status << ", " << gps.gll.posMode << "\n";
         stream << gps.rms.time.toString("hh:mm:ss.z") << ", " << gps.rms.status << ", " << gps.rms.lat << ", " << gps.rms.NS << ", " << \
@@ -18,37 +19,170 @@ void Logger::logTick(GPS gps)
     }
 }
 
-void Logger::logStart()
+void Logger::logTickIdle(uWave uwave)
 {
-    if (writeLog == false)
+    if(writeLogIdle)
     {
-        QString fileName = "Beacon"+QString(" ")+QDate::currentDate().toString("yy-MM-dd")+QString(" ") \
-                +QTime::currentTime().toString("hh-mm-ss")+".txt";
-        qDebug()<<fileName;
-        file.setFileName(fileName);
 
-        if (file.open(QIODevice::ReadWrite | QIODevice::Text))
+        QTextStream stream (&fileIdle);
+        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
+                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
+                  uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
+                  uwave.counterACKIdle << "\n";
+    }
+}
+
+void Logger::logTickRound(uWave uwave)
+{
+    if(writelogRoundR)
+    {
+
+        QTextStream stream (&fileRound);
+        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
+                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
+                  uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
+                  uwave.counterACKIdle << "\n";
+    }
+}
+
+void Logger::logDirect(uWave uwave)
+{
+    if(writelogDirect)
+    {
+
+        QTextStream stream (&fileDirect);
+        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
+                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
+                  uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
+                  uwave.counterACKIdle << "\n";
+    }
+}
+
+void Logger::logStartGPS()
+{
+    if (writeLogGPS == false)
+    {
+        QString fileGPSName = QString("logGPS-")+QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+        qDebug()<<fileGPSName;
+        fileGPS.setFileName(fileGPSName);
+
+        if (fileGPS.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            qDebug()<<"file is opened";
-            writeLog = true;
+            qDebug()<<"fileGPS is opened";
+            writeLogGPS = true;
         }
         else
         {
-            qDebug()<< file.errorString() << " " << file.error();
+            qDebug()<< fileGPS.errorString() << " " << fileGPS.error();
         }
-        QTextStream stream(&file);
+        QTextStream stream(&fileGPS);
 //        stream << "lat, NS, long, EW, time, status, posMode\n";
         stream << "time, status, lat, NS, long, EW, spd, cog, date, mv, mvEW, posMode, counter\n";
 
     }
 }
 
-
-void Logger::logStop()
+void Logger::logStartIdle()
 {
-    if (writeLog == true)
+    if (writeLogIdle == false)
     {
-        writeLog = false;
-        file.close();
+        QString fileIdleName =QString("logIdle-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+        qDebug()<<fileIdleName;
+        fileIdle.setFileName(fileIdleName);
+        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            qDebug()<<"fileIdle is opened";
+            writeLogIdle = true;
+        }
+        else
+        {
+            qDebug()<< fileIdle.errorString() << " " << fileIdle.error();
+        }
+        QTextStream stream(&fileIdle);
+         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
+    }
+}
+
+void Logger::logStartRoundR()
+{
+    if (writelogRoundR == false)
+    {
+        QString fileRoundName =QString("logRoundR-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+        qDebug()<<fileRoundName;
+        fileRound.setFileName(fileRoundName);
+        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            qDebug()<<"fileIdle is opened";
+            writelogRoundR = true;
+        }
+        else
+        {
+            qDebug()<< fileRound.errorString() << " " << fileRound.error();
+        }
+        QTextStream stream(&fileRound);
+         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
+    }
+}
+
+
+void Logger::logStartDirect()
+{
+    if (writelogDirect == false)
+    {
+        QString fileDirectName =QString("logDirect-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+        qDebug()<<fileDirectName;
+        fileDirect.setFileName(fileDirectName);
+        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            qDebug()<<"fileIdle is opened";
+            writelogDirect = true;
+        }
+        else
+        {
+            qDebug()<< fileDirect.errorString() << " " << fileDirect.error();
+        }
+        QTextStream stream(&fileDirect);
+         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
+    }
+}
+
+
+void Logger::logStopGPS()
+{
+    if (writeLogGPS == true)
+    {
+        writeLogGPS = false;
+        fileGPS.close();
+    }
+}
+
+void Logger::logStopIdle()
+{
+    if (writeLogIdle == true)
+    {
+        writeLogIdle = false;
+        fileIdle.close();
+    }
+}
+
+void Logger::logStopRoundR()
+{
+    if (writelogRoundR == true)
+    {
+        writelogRoundR = false;
+        fileRound.close();
+    }
+}
+
+void Logger::logStopDirect()
+{
+    if (writelogDirect == true)
+    {
+        writelogDirect = false;
+        fileDirect.close();
     }
 }

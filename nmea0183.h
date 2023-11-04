@@ -53,7 +53,7 @@ class NMEA0183 : public QObject
 {
     Q_OBJECT
 public:
-    explicit NMEA0183(QString portName, int baudRate = 9600, QObject *parent = 0);
+    explicit NMEA0183(QString portName, int baudRate = 115200, QObject *parent = 0);
     void readData();
     GPS gps;
 protected:
