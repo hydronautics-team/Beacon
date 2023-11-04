@@ -41,7 +41,7 @@ void Logger::logTickRound(uWave uwave)
         stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
                   gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
-                  uwave.counterACKIdle << "\n";
+                  uwave.counterACKIdle << ", " << uwave.puwv3.txChID <<", " << uwave.puwv3.propTime << ", " << uwave.puwv3.distance << ", " << uwave.puwv3.MSR << "\n";
     }
 }
 
@@ -54,7 +54,7 @@ void Logger::logDirect(uWave uwave)
         stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
                   gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
-                  uwave.counterACKIdle << "\n";
+                  uwave.puwv3.counter << ", " << uwave.puwv3.txChID <<", " << uwave.puwv3.propTime << ", " << uwave.puwv3.distance << ", " << uwave.puwv3.MSR << ", " << uwave.puwv4.counter <<"\n";
     }
 }
 
@@ -113,9 +113,9 @@ void Logger::logStartRoundR()
                 +QTime::currentTime().toString("hh-mm-ss")+".txt";
         qDebug()<<fileRoundName;
         fileRound.setFileName(fileRoundName);
-        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        if (fileRound.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            qDebug()<<"fileIdle is opened";
+            qDebug()<<"fileRound is opened";
             writelogRoundR = true;
         }
         else
@@ -123,7 +123,7 @@ void Logger::logStartRoundR()
             qDebug()<< fileRound.errorString() << " " << fileRound.error();
         }
         QTextStream stream(&fileRound);
-         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
+         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK, txChID, propTime, distance, MSR\n";
     }
 }
 
@@ -136,9 +136,9 @@ void Logger::logStartDirect()
                 +QTime::currentTime().toString("hh-mm-ss")+".txt";
         qDebug()<<fileDirectName;
         fileDirect.setFileName(fileDirectName);
-        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        if (fileDirect.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            qDebug()<<"fileIdle is opened";
+            qDebug()<<"fileDirect is opened";
             writelogDirect = true;
         }
         else
@@ -146,7 +146,7 @@ void Logger::logStartDirect()
             qDebug()<< fileDirect.errorString() << " " << fileDirect.error();
         }
         QTextStream stream(&fileDirect);
-         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
+         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK, txChID, propTime, distance, MSR, TIMEOUT_counter\n";
     }
 }
 
@@ -166,6 +166,7 @@ void Logger::logStopIdle()
     {
         writeLogIdle = false;
         fileIdle.close();
+        qDebug() << "fileIdle.close";
     }
 }
 

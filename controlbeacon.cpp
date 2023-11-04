@@ -8,7 +8,14 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(&timerCmd1,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd1);
     connect(&timerCmd2,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd2);
     connect(&timerIdle,&QTimer::timeout,hydro,&Hydroacoustics::modeIdle);
-    connect(hydro, &Hydroacoustics::newMessageDetectedACKIdle, &logger, &Logger::logTickIdle);
+//    connect(this, &ControlBeacon::startDirectConnection, hydro, &Hydroacoustics::modeDirect);
+    connect(&timerDirect,&QTimer::timeout, hydro, &Hydroacoustics::modeDirect);
+//    connect(this,&ControlBeacon::startRoundR,hydro,&Hydroacoustics::modeRound);
+    connect(&timerRound,&QTimer::timeout, hydro, &Hydroacoustics::modeRound);
+    connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickIdle);
+    connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logDirect);
+    connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickRound);
+
 
 
     InitState = new QState();
@@ -41,25 +48,45 @@ ControlBeacon::ControlBeacon(QObject *parent)
 
     connect(InitState,&QState::entered,this, &ControlBeacon::initStateSlot); //при входе в InitState вызывается initStateSlot
     connect(SendCmd1,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
-        timerCmd1.start(1000);
+        timerCmd1.start(2000);
     });
     connect(SendCmd1, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
         timerCmd1.stop();
+        hydro->stopCounter();
     });
     connect(SendCmd2,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
-        timerCmd2.start(1000);
+        timerCmd2.start(2000);
     });
     connect(SendCmd2, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
         timerCmd2.stop();
+        hydro->stopCounter();
     });
     connect(Idle,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartIdle();
-        timerIdle.start(1000);
-
-
     });
-    connect(SendCmd2, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
-        timerIdle.stop();
+    connect(Idle, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
+        logger.logStopIdle();
+        hydro->stopCounter();
+    });
+    connect(DirectConnection,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
+        logger.logStartDirect();
+        timerDirect.start(2000);
+    });
+    connect(DirectConnection, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
+        logger.logStopDirect();
+        hydro->stopCounter();
+        timerDirect.stop();
+    });
+    connect(RoundR,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
+        logger.logStartRoundR();
+//        hydro->timerRound.start(2000);
+        timerRound.start(10000);
+    });
+    connect(RoundR, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
+        logger.logStopRoundR();
+        hydro->stopCounter();
+//        hydro->timerRound.stop();
+        timerRound.stop();
     });
 
     machine.addState(InitState);
@@ -91,7 +118,7 @@ void ControlBeacon::tick()
 
     }
     else if (m_state == "RoundR") {
-
+//    qDebug () <<"RoundR";
     }
     else if (m_state == "DirectConnection"){
 
@@ -105,4 +132,20 @@ void ControlBeacon::initStateSlot()
                      &logger, &Logger::logTickGPS);
     logger.logStartGPS();
 }
+
+void ControlBeacon::slotStartDirect()
+{
+    emit startDirectConnection();
+}
+
+void ControlBeacon::slotStartRound()
+{
+    emit startRoundR();
+}
+
+void ControlBeacon::slotStop()
+{
+    emit finishExchange();
+}
+
 

@@ -1,6 +1,7 @@
-QT -= gui
-QT += core network
+QT += core network \
+    widgets
 QT += serialport
+QT += core gui
 
 CONFIG += c++11 console
 CONFIG -= app_bundle
@@ -12,17 +13,29 @@ CONFIG -= app_bundle
 SOURCES += \
         controlbeacon.cpp \
         hydroacoustics.cpp \
+        json_parser.cpp \
         logger.cpp \
         main.cpp \
-        nmea0183.cpp
+        nmea0183.cpp \
+        widget.cpp
+
+
+
+HEADERS += \
+    controlbeacon.h \
+    hydroacoustics.h \
+    json_parser.h \
+    logger.h \
+    nmea0183.h \
+    widget.h
+
+DISTFILES += \
+    settings.json
+
+FORMS += \
+    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-HEADERS += \
-    controlbeacon.h \
-    hydroacoustics.h \
-    logger.h \
-    nmea0183.h

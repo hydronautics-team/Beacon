@@ -5,6 +5,7 @@
 
 #include <QStateMachine>
 #include <QState>
+#include <QObject>
 #include <QTimer>
 #include "hydroacoustics.h"
 
@@ -36,6 +37,9 @@ signals:
 public slots:
     void tick();
     void initStateSlot();
+    void slotStartDirect();
+    void slotStartRound();
+    void slotStop();
 
 public:
     ControlBeacon(QObject *parent = nullptr);
@@ -67,6 +71,8 @@ protected:
     QTimer timerCmd1;
     QTimer timerCmd2;
     QTimer timerIdle;
+    QTimer timerDirect;
+    QTimer timerRound;
     int dt = 100;
     State m_stateCode;
 };
