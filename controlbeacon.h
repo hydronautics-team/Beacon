@@ -21,6 +21,12 @@ static QMap<State,QString> statesMap = {
     {State::Idle, "Idle"}
 };
 
+struct Settings
+{
+    QString comGPS;
+    QString comHydro;
+    QString puwv1_channel_settings;
+};
 
 class ControlBeacon : public QObject
 {
@@ -42,6 +48,11 @@ public slots:
     void slotStartRound();
     void slotStop();
     void update(uWave uwave);
+public:
+    Settings set;
+    QString val;
+    QFile file;
+    void parser(QString val);
 
 public:
     ControlBeacon(QObject *parent = nullptr);

@@ -100,7 +100,9 @@ void Hydroacoustics::sendCmd2()// в этом сообщении настраи�
     {
 //        qDebug() << "snsn";
      //   char PUWV6[18] = "$PUWVF,1,1,0*5E\r\n"; // Настройки пакетного режима 0 адрес
-        char PUWV1[30] = "$PUWV1,0,1,0.,1,1,9.8067*34\r\n"; // Настройки пакетного режима 5 адрес
+//        char PUWV1[30] = "$PUWV1,0,1,0.,1,1,9.8067*34\r\n";
+        char PUWV1[30] = "$PUWV1,0,0,0.,1,1,9.8067*35\r\n";
+
         ha.write(PUWV1, 30);
         ha.waitForBytesWritten();
     }
@@ -139,9 +141,9 @@ void Hydroacoustics::modeIdle()
 
 void Hydroacoustics::modeDirect()
 {
-    char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос
+//    char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос
 //    char PUWV2[18] = "$PUWV2,1,1,2*28\r\n";
-//    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
     qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     ha.waitForBytesWritten();
 }

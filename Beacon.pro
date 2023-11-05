@@ -13,7 +13,6 @@ CONFIG -= app_bundle
 SOURCES += \
         controlbeacon.cpp \
         hydroacoustics.cpp \
-        json_parser.cpp \
         logger.cpp \
         main.cpp \
         nmea0183.cpp \
@@ -24,13 +23,11 @@ SOURCES += \
 HEADERS += \
     controlbeacon.h \
     hydroacoustics.h \
-    json_parser.h \
     logger.h \
     nmea0183.h \
     widget.h
 
-DISTFILES += \
-    settings.json
+DISTFILES +=
 
 FORMS += \
     widget.ui

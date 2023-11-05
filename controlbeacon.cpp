@@ -1,10 +1,26 @@
 #include "controlbeacon.h"
-
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 
 ControlBeacon::ControlBeacon(QObject *parent)
 {
-    hydro = new Hydroacoustics("COM8");
+//
+    QString val;
+    QFile file;
+
+    file.setFileName("settings.json");
+    file.open(QIODevice::ReadOnly | QIODevice::Text);
+    val = file.readAll();
+    file.close();
+    parser(val);
+
+    qDebug() << "set.comGPS: "<< set.comGPS;
+    hydro = new Hydroacoustics(set.comHydro);
+    gps = new NMEA0183 (set.comGPS);
+
+
     connect(&timerCmd1,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd1);
     connect(&timerCmd2,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd2);
     connect(&timerIdle,&QTimer::timeout,hydro,&Hydroacoustics::modeIdle);
@@ -95,8 +111,8 @@ ControlBeacon::ControlBeacon(QObject *parent)
     machine.addState(RoundR);
     machine.addState(DirectConnection);
     machine.setInitialState(InitState);
-    machine.start();
 
+    machine.start();
 
 //    connect(InitState, &QState::entered, this, [this](){
 //        qDebug()<<"Init state entred";
@@ -128,11 +144,21 @@ void ControlBeacon::tick()
 
 void ControlBeacon::initStateSlot()
 {
-    gps = new NMEA0183 ("COM12");
     connect(gps, &NMEA0183::newMessageDetected,
                      &logger, &Logger::logTickGPS);
     logger.logStartGPS();
+
 }
+
+void ControlBeacon::parser(QString val)
+{
+    qDebug() << val;
+    QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
+    QJsonObject json = doc.object();
+    set.comGPS = json["COM_GPS"].toString();
+    set.comHydro = json["COM_HYDRO"].toString();
+    set.puwv1_channel_settings = json["PUWV1"].toString();
+};
 
 void ControlBeacon::slotStartDirect()
 {

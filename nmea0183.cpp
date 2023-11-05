@@ -14,6 +14,7 @@ NMEA0183::NMEA0183(QString portName, int baudRate, QObject *parent)
 void NMEA0183::readData()
 {
     gps_buffer.append(gps_port.readAll());
+    qDebug() << "gps_buffer: " << gps_buffer;
     parseBuffer();
     emit newMessageDetected(gps);
 }
