@@ -34,12 +34,14 @@ signals:
     void startDirectConnection();
     void initCmd2Done();
     void initCmd3Done();
+    void updateUpdate(uWave uwave);
 public slots:
     void tick();
     void initStateSlot();
     void slotStartDirect();
     void slotStartRound();
     void slotStop();
+    void update(uWave uwave);
 
 public:
     ControlBeacon(QObject *parent = nullptr);

@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
     QObject::connect(&w, &Widget::startDirect, &cb, &ControlBeacon::slotStartDirect);
     QObject::connect(&w, &Widget::startRoundR, &cb, &ControlBeacon::slotStartRound);
     QObject::connect(&w, &Widget::stop, &cb, &ControlBeacon::slotStop);
+    QObject::connect(&cb, &ControlBeacon::updateUpdate, &w, &Widget::update);
 
     w.show();
 

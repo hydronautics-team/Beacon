@@ -139,28 +139,41 @@ void Hydroacoustics::modeIdle()
 
 void Hydroacoustics::modeDirect()
 {
-//    char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос
+    char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос
 //    char PUWV2[18] = "$PUWV2,1,1,2*28\r\n";
-    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+//    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
     qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     ha.waitForBytesWritten();
 }
 
 void Hydroacoustics::modeRound()
 {
-    clearAll();
-    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
-    qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
-    ha.waitForBytesWritten();
-    timerRound.start(3000);
-    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
-    clearAll();
-    timerRound.stop();
-    char PUWV22[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
-    qDebug()<<"bytes written :" << ha.write(PUWV22, 18);
-    ha.waitForBytesWritten();
-    timerRound.start(3000);
-    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
+    if (roundCounter == 1) {
+        char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+        qDebug()<<"bytes written (to beacon 1-0):" << ha.write(PUWV2, 18);
+        ha.waitForBytesWritten();
+        roundCounter ++;
+    }
+    else if (roundCounter == 2) {
+        char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
+        qDebug()<<"bytes written (to beacon 0-0):" << ha.write(PUWV2, 18);
+        ha.waitForBytesWritten();
+        roundCounter =1;
+    }
+
+//    clearAll();
+//    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+//    qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
+//    ha.waitForBytesWritten();
+//    timerRound.start(3000);
+//    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
+//    clearAll();
+//    timerRound.stop();
+//    char PUWV22[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
+//    qDebug()<<"bytes written :" << ha.write(PUWV22, 18);
+//    ha.waitForBytesWritten();
+//    timerRound.start(3000);
+//    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
 }
 
 void Hydroacoustics::parseBuffer()

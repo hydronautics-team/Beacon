@@ -85,6 +85,7 @@ protected:
     QByteArray ha_buffer;
     int crc (QByteArray msg);
     int crc_real(qint8 crc_in);
+    int roundCounter = 1;
 
 signals:
     void cmd1Received(); //

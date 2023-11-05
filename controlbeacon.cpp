@@ -4,7 +4,7 @@
 
 ControlBeacon::ControlBeacon(QObject *parent)
 {
-    hydro = new Hydroacoustics("COM3");
+    hydro = new Hydroacoustics("COM8");
     connect(&timerCmd1,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd1);
     connect(&timerCmd2,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd2);
     connect(&timerIdle,&QTimer::timeout,hydro,&Hydroacoustics::modeIdle);
@@ -15,6 +15,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickIdle);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logDirect);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickRound);
+    connect(hydro, &Hydroacoustics::updateData, this, &ControlBeacon::update);
 
 
 
@@ -80,7 +81,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(RoundR,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartRoundR();
 //        hydro->timerRound.start(2000);
-        timerRound.start(10000);
+        timerRound.start(3000);
     });
     connect(RoundR, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
         logger.logStopRoundR();
@@ -146,6 +147,11 @@ void ControlBeacon::slotStartRound()
 void ControlBeacon::slotStop()
 {
     emit finishExchange();
+}
+
+void ControlBeacon::update(uWave uwave)
+{
+    emit updateUpdate(uwave);
 }
 
 

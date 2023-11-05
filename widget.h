@@ -24,6 +24,8 @@ signals:
     void startDirect();
     void startRoundR();
     void stop();
+public slots:
+    void update(uWave uwave);
 
 };
 

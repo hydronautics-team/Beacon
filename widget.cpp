@@ -22,3 +22,9 @@ Widget::~Widget()
 {
     delete ui;
 }
+
+void Widget::update(uWave uwave)
+{
+    ui->good->setNum(uwave.puwv3.counter);
+    ui->notGood->setNum(uwave.puwv4.counter);
+}
