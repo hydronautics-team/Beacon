@@ -21,6 +21,8 @@ static QMap<State,QString> statesMap = {
     {State::Idle, "Idle"}
 };
 
+
+
 struct Settings
 {
     QString comGPS;
@@ -38,21 +40,28 @@ signals:
     void startRoundR();
     void finishExchange();
     void startDirectConnection();
+    void startDirectChannel(Channel ch);
+    void startRoundChannel(ChannelRound chRCB);
     void initCmd2Done();
     void initCmd3Done();
     void updateUpdate(uWave uwave);
 public slots:
     void tick();
     void initStateSlot();
-    void slotStartDirect();
-    void slotStartRound();
+    void slotStartDirect(Channel ch);
+    void slotStartRound(ChannelRound chW);
     void slotStop();
     void update(uWave uwave);
+    void updateTime(double time);
 public:
     Settings set;
     QString val;
     QFile file;
     void parser(QString val);
+    Channel chanel;
+    ChannelRound chRCB;
+    double timeQuest = 2000;
+
 
 public:
     ControlBeacon(QObject *parent = nullptr);

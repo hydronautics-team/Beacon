@@ -50,9 +50,22 @@ void Hydroacoustics::readData()
 int Hydroacoustics::crc(QByteArray tmp)
 {
     int crc_ = 0;
-    for (int i = 0; i <= tmp.size(); i++)
+    for (int i = 0; i <= (tmp.size()-1); i++)
+    {
         crc_^=tmp[i];
+    }
     return crc_;
+}
+
+QByteArray Hydroacoustics::crc_MSG(QByteArray tmp)
+{
+    int crc_ = 0;
+    for (int i = 0; i <= tmp.size(); i++)
+    {
+        crc_^=tmp[i];
+    }
+    QByteArray crcRes = QByteArray::number(crc_, 16).toUpper();;
+    return crcRes;
 }
 
 int Hydroacoustics::crc_real(qint8 crc_in)
@@ -141,9 +154,13 @@ void Hydroacoustics::modeIdle()
 
 void Hydroacoustics::modeDirect()
 {
+
 //    char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос
 //    char PUWV2[18] = "$PUWV2,1,1,2*28\r\n";
-    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+//    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+//    qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
+    QByteArray array = request_PUWV2(chD.txCh, chD.rxCh);
+    char *PUWV2 = array.data();
     qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     ha.waitForBytesWritten();
 }
@@ -151,14 +168,20 @@ void Hydroacoustics::modeDirect()
 void Hydroacoustics::modeRound()
 {
     if (roundCounter == 1) {
-        char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
-        qDebug()<<"bytes written (to beacon 1-0):" << ha.write(PUWV2, 18);
+//        char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
+//        qDebug()<<"bytes written (to beacon 1-0):" << ha.write(PUWV2, 18);
+        QByteArray array = request_PUWV2(chR.txCh1, chR.rxCh);
+        char *PUWV2 = array.data();
+        qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
         ha.waitForBytesWritten();
         roundCounter ++;
     }
     else if (roundCounter == 2) {
-        char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
-        qDebug()<<"bytes written (to beacon 0-0):" << ha.write(PUWV2, 18);
+//        char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
+//        qDebug()<<"bytes written (to beacon 0-0):" << ha.write(PUWV2, 18);
+        QByteArray array = request_PUWV2(chR.txCh2, chR.rxCh);
+        char *PUWV2 = array.data();
+        qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
         ha.waitForBytesWritten();
         roundCounter =1;
     }
@@ -175,8 +198,20 @@ void Hydroacoustics::modeRound()
 //    qDebug()<<"bytes written :" << ha.write(PUWV22, 18);
 //    ha.waitForBytesWritten();
 //    timerRound.start(3000);
-//    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
+    //    while ((timerRound.timerId() != 0) or  (uwave.puwv3.rcCmdID = 0) or (uwave.puwv4.rcCmdID = 0)) {}
 }
+
+void Hydroacoustics::settingsChannelDirect(Channel chDirect)
+{
+    chD.txCh = chDirect.txCh;
+    chD.rxCh = chDirect.rxCh;
+}
+
+void Hydroacoustics::settingsChannelRound(ChannelRound chRoundBC)
+{
+    chR = chRoundBC;
+}
+
 
 void Hydroacoustics::parseBuffer()
 {
@@ -348,7 +383,22 @@ void Hydroacoustics::parsePUWV4(QByteArray msg)
     uwave.puwv4.rcCmdID = atoi(msg.mid(0, 1));
     qDebug() << "puwv4.rcCmdID: "<< uwave.puwv4.rcCmdID;
     msg.remove(0, index+1);
-    uwave.puwv4.counter++;
+    uwave.puwv4.counterAll++;
+    if (uwave.puwv4.txChID == 1){
+        uwave.puwv4.counterID1++;
+    }
+    else if (uwave.puwv4.txChID == 2){
+        uwave.puwv4.counterID2++;
+    }
+    else if (uwave.puwv4.txChID == 3){
+            uwave.puwv4.counterID3++;
+        }
+    else if (uwave.puwv4.txChID == 4){
+        uwave.puwv4.counterID4++;
+    }
+    else {
+        uwave.puwv4.counter++;
+    }
 }
 
 void Hydroacoustics::parsePUWV3(QByteArray msg)
@@ -376,8 +426,31 @@ void Hydroacoustics::parsePUWV3(QByteArray msg)
     uwave.puwv3.Value = atof(msg.mid(0, index));
     qDebug() << "puwv3.Value: "<< uwave.puwv3.Value;
     msg.remove(0, index+1);
-    uwave.puwv3.counter++;
-    uwave.puwv3.distance = 1500 *uwave.puwv3.propTime;
+    uwave.puwv3.counterAll++;
+    if(uwave.puwv3.txChID ==1){
+        uwave.puwv3.distanceID1 = 1500 *uwave.puwv3.propTime;
+        uwave.puwv3.counterID1++;
+    }
+
+    else if(uwave.puwv3.txChID ==2){
+        uwave.puwv3.distanceID2 = 1500 *uwave.puwv3.propTime;
+        uwave.puwv3.counterID2++;
+    }
+
+    else if(uwave.puwv3.txChID ==3){
+        uwave.puwv3.distanceID3 = 1500 *uwave.puwv3.propTime;
+        uwave.puwv3.counterID3++;
+    }
+
+    else if(uwave.puwv3.txChID ==4){
+        uwave.puwv3.distanceID4 = 1500 *uwave.puwv3.propTime;
+        uwave.puwv3.counterID4++;
+    }
+    else {
+        uwave.puwv3.distance = 1500 *uwave.puwv3.propTime;
+        uwave.puwv3.counter++;
+    }
+
 }
 
 void Hydroacoustics::stopCounter()
@@ -386,6 +459,16 @@ void Hydroacoustics::stopCounter()
     uwave.puwv4.counter = 0;
     uwave.puwv3.counter = 0;
     uwave.counterACKIdle = 0;
+    uwave.puwv3.counterID1 = 0;
+    uwave.puwv3.counterID2 = 0;
+    uwave.puwv3.counterID3 = 0;
+    uwave.puwv3.counterID4 = 0;
+    uwave.puwv3.counterAll = 0;
+    uwave.puwv4.counterID1 = 0;
+    uwave.puwv4.counterID2 = 0;
+    uwave.puwv4.counterID3 = 0;
+    uwave.puwv4.counterID4 = 0;
+    uwave.puwv4.counterAll = 0;
 }
 
 void Hydroacoustics::clearAll()
@@ -398,3 +481,20 @@ void Hydroacoustics::clearAll()
     uwave.puwv4.rcCmdID = 0;
 }
 
+QByteArray Hydroacoustics::request_PUWV2(int idModem,int idChennel)
+{
+    //$PUWV2,1,0,2*29\r\n
+    QByteArray command = "$PUWV2,";
+    QByteArray idMod = QByteArray::number(idModem);
+    command.append(QByteArray::number(idModem));
+    command.append(",");
+    command.append(QByteArray::number(idChennel));
+    command.append(",2*");
+    qint8 end = command.size();
+    QByteArray msg = command.mid(1, end-2);
+    qDebug() << "msg: " << msg;
+    command.append(crc_MSG(msg));
+    command.append("\r\n");
+    qDebug() << "command: " << command;
+    return command;
+};

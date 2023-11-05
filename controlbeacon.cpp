@@ -27,6 +27,8 @@ ControlBeacon::ControlBeacon(QObject *parent)
 //    connect(this, &ControlBeacon::startDirectConnection, hydro, &Hydroacoustics::modeDirect);
     connect(&timerDirect,&QTimer::timeout, hydro, &Hydroacoustics::modeDirect);
 //    connect(this,&ControlBeacon::startRoundR,hydro,&Hydroacoustics::modeRound);
+    connect(this,&ControlBeacon::startDirectChannel,hydro,&Hydroacoustics::settingsChannelDirect);
+    connect(this,&ControlBeacon::startRoundChannel,hydro,&Hydroacoustics::settingsChannelRound);
     connect(&timerRound,&QTimer::timeout, hydro, &Hydroacoustics::modeRound);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickIdle);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logDirect);
@@ -87,7 +89,8 @@ ControlBeacon::ControlBeacon(QObject *parent)
     });
     connect(DirectConnection,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartDirect();
-        timerDirect.start(2000);
+        timerDirect.start(timeQuest);
+
     });
     connect(DirectConnection, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
         logger.logStopDirect();
@@ -97,7 +100,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(RoundR,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartRoundR();
 //        hydro->timerRound.start(2000);
-        timerRound.start(3000);
+        timerRound.start(timeQuest);
     });
     connect(RoundR, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
         logger.logStopRoundR();
@@ -147,6 +150,8 @@ void ControlBeacon::initStateSlot()
     connect(gps, &NMEA0183::newMessageDetected,
                      &logger, &Logger::logTickGPS);
     logger.logStartGPS();
+    //УДАЛИТЬ!!!
+    hydro->request_PUWV2(1,1);
 
 }
 
@@ -158,15 +163,28 @@ void ControlBeacon::parser(QString val)
     set.comGPS = json["COM_GPS"].toString();
     set.comHydro = json["COM_HYDRO"].toString();
     set.puwv1_channel_settings = json["PUWV1"].toString();
-};
+}
 
-void ControlBeacon::slotStartDirect()
+
+
+void ControlBeacon::slotStartDirect(Channel ch)
 {
+    chanel.txCh = ch.txCh;
+    chanel.rxCh = ch.rxCh;
+        qDebug() << "chanel.txCh" << chanel.txCh;
+        qDebug() << "chanel.rxCh" << chanel.rxCh;
+    emit startDirectChannel(chanel);
     emit startDirectConnection();
 }
 
-void ControlBeacon::slotStartRound()
+void ControlBeacon::slotStartRound(ChannelRound chW)
 {
+    chRCB.txCh1 = chW.txCh1;
+    chRCB.txCh2 = chW.txCh2;
+    chRCB.txCh3 = chW.txCh3;
+    chRCB.txCh4 = chW.txCh4;
+    chRCB.rxCh = chW.rxCh;
+    emit startRoundChannel(chRCB);
     emit startRoundR();
 }
 
@@ -178,6 +196,12 @@ void ControlBeacon::slotStop()
 void ControlBeacon::update(uWave uwave)
 {
     emit updateUpdate(uwave);
+}
+
+void ControlBeacon::updateTime(double time)
+{
+    timeQuest = time*1000;
+    qDebug() << "timeQuest: " << timeQuest;
 }
 
 

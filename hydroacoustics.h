@@ -7,6 +7,20 @@
 
 #pragma pack(push,1)
 
+struct Channel
+{
+    int txCh = 0;
+    int rxCh = 0;
+};
+
+struct ChannelRound
+{
+    int txCh1 = 0;
+    int txCh2 = 0;
+    int txCh3 = 0;
+    int txCh4 = 0;
+    int rxCh = 0;
+};
 
 struct PUWVE //ответ от модема на включение командного режима
 {
@@ -25,7 +39,12 @@ struct PUWV4
 {
     unsigned char txChID = 0;
     unsigned char rcCmdID = 0;
+    int counterID1 = 0;
+    int counterID2 = 0;
+    int counterID3 = 0;
+    int counterID4 = 0;
     int counter = 0;
+    int counterAll = 0;
 };
 
 struct PUWV3
@@ -33,10 +52,19 @@ struct PUWV3
     unsigned char txChID = 0;
     unsigned char rcCmdID = 0;
     float propTime = 0;
-    float distance = 0;
     float MSR = 0;
     float Value = 0;
+    float distanceID1 = 0;
+    float distanceID2 = 0;
+    float distanceID3 = 0;
+    float distanceID4 = 0;
+    float distance = 0;
+    int counterID1 = 0;
+    int counterID2 = 0;
+    int counterID3 = 0;
+    int counterID4 = 0;
     int counter = 0;
+    int counterAll = 0;
 };
 
 struct PUWV7
@@ -79,11 +107,16 @@ public:
     void stopCounter();
     void clearAll();
     QTimer timerRound;
+    QByteArray request_PUWV2(int idModem, int idChennel);
+    Channel chD;
+    ChannelRound chR;
+
 
 protected:
     QSerialPort ha;
     QByteArray ha_buffer;
     int crc (QByteArray msg);
+    QByteArray crc_MSG (QByteArray msg);
     int crc_real(qint8 crc_in);
     int roundCounter = 1;
 
@@ -99,6 +132,8 @@ public slots:
     void modeIdle();
     void modeDirect();
     void modeRound();
+    void settingsChannelDirect(Channel chDirect);
+    void settingsChannelRound(ChannelRound chRound);
 
 
 };
