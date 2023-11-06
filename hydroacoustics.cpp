@@ -161,6 +161,7 @@ void Hydroacoustics::modeDirect()
 //    qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     QByteArray array = request_PUWV2(chD.txCh, chD.rxCh);
     char *PUWV2 = array.data();
+
     qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     ha.waitForBytesWritten();
 }
@@ -168,20 +169,29 @@ void Hydroacoustics::modeDirect()
 void Hydroacoustics::modeRound()
 {
     if (roundCounter == 1) {
+        qDebug() << "roundCounter == 1 и я общаюсь с: " << chR.txCh1;
 //        char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
 //        qDebug()<<"bytes written (to beacon 1-0):" << ha.write(PUWV2, 18);
         QByteArray array = request_PUWV2(chR.txCh1, chR.rxCh);
         char *PUWV2 = array.data();
-        qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
+
+        uwave.counterACK1++;
+
+        qDebug()<< "модем "<< chR.txCh1<<"bytes written :" << ha.write(PUWV2, 18);
+        qDebug() << "uwave.counterACK1: "<<uwave.counterACK1;
         ha.waitForBytesWritten();
         roundCounter ++;
     }
     else if (roundCounter == 2) {
 //        char PUWV2[18] = "$PUWV2,0,0,2*28\r\n"; // запрос //передача 0 прием 0
 //        qDebug()<<"bytes written (to beacon 0-0):" << ha.write(PUWV2, 18);
+        qDebug() << "roundCounter == 2 и я общаюсь с: " << chR.txCh2;
         QByteArray array = request_PUWV2(chR.txCh2, chR.rxCh);
         char *PUWV2 = array.data();
-        qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
+
+        uwave.counterACK2++;
+        qDebug()<< "модем "<< chR.txCh2 <<"bytes written :" << ha.write(PUWV2, 18);
+        qDebug() << "uwave.counterACK2: "<<uwave.counterACK2;
         ha.waitForBytesWritten();
         roundCounter =1;
     }
@@ -327,6 +337,12 @@ void Hydroacoustics::parsePUWV0(QByteArray msg)
     uwave.puwv0.errCode = atoi(msg.mid(0, 1));
     qDebug() << "puwv0.errCode: "<< uwave.puwv0.errCode;
     msg.remove(0, index+1);
+    if ((uwave.puwv0.errCode == 0) and (uwave.puwv0.cmdID ==2))
+    {
+        uwave.counterACK++;
+        qDebug() << "uwave.counterACK++ отправлено сообещние: " << uwave.counterACK;
+    }
+
 }
 
 void Hydroacoustics::parsePUWVE(QByteArray msg)
@@ -458,7 +474,7 @@ void Hydroacoustics::stopCounter()
     qDebug() << "stopCounter";
     uwave.puwv4.counter = 0;
     uwave.puwv3.counter = 0;
-    uwave.counterACKIdle = 0;
+    uwave.counterACK = 0;
     uwave.puwv3.counterID1 = 0;
     uwave.puwv3.counterID2 = 0;
     uwave.puwv3.counterID3 = 0;
@@ -469,6 +485,9 @@ void Hydroacoustics::stopCounter()
     uwave.puwv4.counterID3 = 0;
     uwave.puwv4.counterID4 = 0;
     uwave.puwv4.counterAll = 0;
+    uwave.counterACK1 = 0;
+    uwave.counterACK2 = 0;
+
 }
 
 void Hydroacoustics::clearAll()

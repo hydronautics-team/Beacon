@@ -56,6 +56,9 @@ void Widget::update(uWave uwave)
     ui->distanceRoundID2->setNum(uwave.puwv3.distanceID2);
     ui->distanceRoundID3->setNum(uwave.puwv3.distanceID3);
     ui->distanceRoundID4->setNum(uwave.puwv3.distanceID4);
+    ui->labelcounterACK->setNum(uwave.counterACK);
+    ui->counterACK1->setNum(uwave.counterACK1);
+    ui->counterACK2->setNum(uwave.counterACK2);
 }
 
 void Widget::updateModeDirect()

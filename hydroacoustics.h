@@ -82,7 +82,9 @@ struct uWave
     PUWV7 puwv7;
     PUWV4 puwv4;
     PUWV3 puwv3;
-    int counterACKIdle = 0;
+    int counterACK = 0;
+    int counterACK1 = 0;
+    int counterACK2 = 0;
     QByteArray infoModem;
 };
 
