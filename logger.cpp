@@ -39,8 +39,8 @@ void Logger::logTickRound(uWave uwave)
 
         QTextStream stream (&fileRound);
         stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
-                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  \
+                  gpsS.rms.lat << ", "  << \
+                  gpsS.rms.long_ << ", "  <<  \
                   gpsS.rms.counter << ", "  << \
                   uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << \
@@ -79,8 +79,8 @@ void Logger::logDirect(uWave uwave)
 
         QTextStream stream (&fileDirect);
         stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
-                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  \
+                  gpsS.rms.lat << ", "  << \
+                  gpsS.rms.long_ << ", "  <<  \
                   gpsS.rms.counter << ", "  << \
                   uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << \
