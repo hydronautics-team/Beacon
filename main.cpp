@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     QObject::connect(&cb, &ControlBeacon::updateUpdate, &w, &Widget::update);
     QObject::connect(&w, &Widget::signalTimeUpdate, &cb, &ControlBeacon::updateTime);
 
-    w.show();
+//    w.show();
 
 
     return a.exec();
