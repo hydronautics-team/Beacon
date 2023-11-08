@@ -17,8 +17,8 @@ SOURCES += \
         logger.cpp \
         main.cpp \
         nmea0183.cpp \
-        protocol_bort_Beacon/protocol_bort.cpp \
-        protocol_bort_Beacon/protocol_pc.cpp \
+        protocol/protocol_bort.cpp \
+        protocol/protocol_pc.cpp \
         widget.cpp
 
 
@@ -29,11 +29,11 @@ HEADERS += \
     json_parser.h \
     logger.h \
     nmea0183.h \
-    protocol_bort_Beacon/pc_protocol.h \
-    protocol_bort_Beacon/protocol.h \
-    protocol_bort_Beacon/protocol_bort.h \
-    protocol_bort_Beacon/protocol_pc.h \
-    protocol_bort_Beacon/udp_protocol.h \
+    protocol/pc_protocol.h \
+    protocol/protocol.h \
+    protocol/protocol_bort.h \
+    protocol/protocol_pc.h \
+    protocol/udp_protocol.h \
     widget.h
 
 DISTFILES +=
