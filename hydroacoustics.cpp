@@ -102,8 +102,10 @@ void Hydroacoustics::sendCmd1()
 
 void Hydroacoustics::settings()
 {
-    char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
-    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
+//    char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
+//    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
+    char PUWV6[27] = "$PUWV6,1,1000,1,1,1,1*02\r\n"; // включаем передачу сообщений о состоянии модема
+    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 27);
     ha.waitForBytesWritten();
 }
 

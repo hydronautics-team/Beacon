@@ -13,9 +13,12 @@ CONFIG -= app_bundle
 SOURCES += \
         controlbeacon.cpp \
         hydroacoustics.cpp \
+        json_parser.cpp \
         logger.cpp \
         main.cpp \
         nmea0183.cpp \
+        protocol_bort_Beacon/protocol_bort.cpp \
+        protocol_bort_Beacon/protocol_pc.cpp \
         widget.cpp
 
 
@@ -23,8 +26,14 @@ SOURCES += \
 HEADERS += \
     controlbeacon.h \
     hydroacoustics.h \
+    json_parser.h \
     logger.h \
     nmea0183.h \
+    protocol_bort_Beacon/pc_protocol.h \
+    protocol_bort_Beacon/protocol.h \
+    protocol_bort_Beacon/protocol_bort.h \
+    protocol_bort_Beacon/protocol_pc.h \
+    protocol_bort_Beacon/udp_protocol.h \
     widget.h
 
 DISTFILES +=

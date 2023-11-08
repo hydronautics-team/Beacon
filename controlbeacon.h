@@ -8,6 +8,8 @@
 #include <QObject>
 #include <QTimer>
 #include "hydroacoustics.h"
+#include "protocol_bort_Beacon/protocol_bort.h"
+#include "protocol_bort_Beacon/protocol_pc.h"
 
 enum class  State : qint8 {
     InitState,
@@ -23,12 +25,6 @@ static QMap<State,QString> statesMap = {
 
 
 
-struct Settings
-{
-    QString comGPS;
-    QString comHydro;
-    QString puwv1_channel_settings;
-};
 
 class ControlBeacon : public QObject
 {
@@ -54,10 +50,7 @@ public slots:
     void update(uWave uwave);
     void updateTime(double time);
 public:
-    Settings set;
-    QString val;
-    QFile file;
-    void parser(QString val);
+
     Channel chanel;
     ChannelRound chRCB;
     double timeQuest = 2000;

@@ -1,24 +1,15 @@
 #include "controlbeacon.h"
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonDocument>
+#include "json_parser.h"
 
 
 ControlBeacon::ControlBeacon(QObject *parent)
 {
 //
-    QString val;
-    QFile file;
-
-    file.setFileName("settings.json");
-    file.open(QIODevice::ReadOnly | QIODevice::Text);
-    val = file.readAll();
-    file.close();
-    parser(val);
-
-    qDebug() << "set.comGPS: "<< set.comGPS;
-    hydro = new Hydroacoustics(set.comHydro);
-    gps = new NMEA0183 (set.comGPS);
+   Json_parser js;
+    protocolAUV protocolauv;
+   qDebug() << "js.set.comHydro: " <<js.set.comHydro;
+    hydro = new Hydroacoustics(js.set.comHydro);
+//    gps = new NMEA0183 (set.comGPS);
 
 
     connect(&timerCmd1,&QTimer::timeout,hydro,&Hydroacoustics::sendCmd1);
@@ -81,10 +72,10 @@ ControlBeacon::ControlBeacon(QObject *parent)
         hydro->stopCounter();
     });
     connect(Idle,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
-        logger.logStartIdle();
+//        logger.logStartIdle();
     });
     connect(Idle, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
-        logger.logStopIdle();
+//        logger.logStopIdle();
         hydro->stopCounter();
     });
     connect(DirectConnection,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
@@ -147,23 +138,14 @@ void ControlBeacon::tick()
 
 void ControlBeacon::initStateSlot()
 {
-    connect(gps, &NMEA0183::newMessageDetected,
-                     &logger, &Logger::logTickGPS);
-    logger.logStartGPS();
+//    connect(gps, &NMEA0183::newMessageDetected,
+//                     &logger, &Logger::logTickGPS);
+//    logger.logStartGPS();
     //УДАЛИТЬ!!!
-    hydro->request_PUWV2(1,1);
+//    hydro->request_PUWV2(1,1);
 
 }
 
-void ControlBeacon::parser(QString val)
-{
-    qDebug() << val;
-    QJsonDocument doc = QJsonDocument::fromJson(val.toUtf8());
-    QJsonObject json = doc.object();
-    set.comGPS = json["COM_GPS"].toString();
-    set.comHydro = json["COM_HYDRO"].toString();
-    set.puwv1_channel_settings = json["PUWV1"].toString();
-}
 
 
 
