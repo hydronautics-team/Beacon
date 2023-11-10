@@ -10,18 +10,18 @@
 
 struct Channel
 {
-    int txCh = 0;
-    int rxCh = 0;
+    quint8 txCh = 0;
+    quint8 rxCh = 0;
 };
 
 struct ChannelRound
 {
-    int txCh1 = 0;
-    int txCh2 = 0;
-    int txCh3 = 0;
-    int txCh4 = 0;
-    int rxCh = 0;
-    int Number = 0;
+    quint8 txCh1 = 0;
+    quint8 txCh2 = 0;
+    quint8 txCh3 = 0;
+    quint8 txCh4 = 0;
+    quint8 rxCh = 0;
+    quint8 Number = 0;
 };
 
 struct PUWVE //ответ от модема на включение командного режима
@@ -101,6 +101,7 @@ class Hydroacoustics : public QObject
 public:
     explicit Hydroacoustics(QString portName, int baudRate = 9600,
                             QObject *parent = nullptr);
+    float salinity = 0.;
     uWave uwave;
     void settings();
     void parseBuffer();
@@ -114,6 +115,7 @@ public:
     void clearAll();
     QTimer timerRound;
     QByteArray request_PUWV2(int idModem, int idChennel);
+    QByteArray request_PUWV1(float STY = 0., int idModem = 1, int idChennel = 0, float gravityAcc = 9.8067);
     Channel chD;
     ChannelRound chR;
 

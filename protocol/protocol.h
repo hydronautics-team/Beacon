@@ -35,10 +35,10 @@ struct Coordinate
  */
 struct BeaconData
 {
-    qint8           id;             //! id буя
-    quint8          nbr_rd;         //! Число полученных ответ
-    quint8          nbr_td;         //! Число отправленных сообщений
-    quint8          tFlight;        //! Время от отправки до получения
+    qint8           id = 1;             //! id буя
+    quint8          nbr_rd = 0;         //! Число полученных ответ
+    quint8          nbr_td = 0;         //! Число отправленных сообщений
+    quint8          tFlight = 0;        //! Время от отправки до получения
 };
 
 /*!
@@ -47,7 +47,7 @@ struct BeaconData
  */
 struct Direct_agent
 {
-    float           dt;           //! Период запросов
+    float           dt = 3;           //! Период запросов
     BeaconData      receiver;     //! Информация о получателе сообщений
 };
 
@@ -57,8 +57,8 @@ struct Direct_agent
  */
 struct Round_agent
 {
-    float           dt;             //! Период запросов
-    quint8          countBeacon;    //! Число опрашиваемых буёв
+    float           dt = 3;             //! Период запросов
+    quint8          countBeacon = 4;    //! Число опрашиваемых буёв
     BeaconData      receiver1;      //! Информация о получателе сообщений 1
     BeaconData      receiver2;      //! Информация о получателе сообщений 2
     BeaconData      receiver3;      //! Информация о получателе сообщений 3
@@ -82,8 +82,8 @@ struct Mode_data_agent
  */
 struct Round_gui
 {
-    float           dt;             //! Период запросов
-    quint8          countBeacon;    //! Число опрашиваемых буёв
+    float           dt = 3;             //! Период запросов
+    quint8          countBeacon = 4;    //! Число опрашиваемых буёв
     Coordinate      receiver1;      //! Информация о получателе сообщений 1
     Coordinate      receiver2;      //! Информация о получателе сообщений 2
     Coordinate      receiver3;      //! Информация о получателе сообщений 3
@@ -96,7 +96,7 @@ struct Round_gui
  */
 struct Direct_gui
 {
-    float           dt;             //! Период запросов
+    float           dt = 3;             //! Период запросов
     Coordinate      receiver;       //! Информация о получателе сообщений
 };
 
@@ -123,8 +123,8 @@ struct FromPult
     Mode_select     mode_select;    //! Выбранный режим работы ГА модема
     Mode_data_gui   mode_data;      //! Информация о режиме работы
 
-    quint8          salinity;       //! Информация о солености воды
-    quint8          salinityFlag;   //! Флаг обновления солености воды
+    float          salinity = 0;       //! Информация о солености воды
+    float          salinityFlag = 0;   //! Флаг обновления солености воды
     uint checksum;
 };
 
@@ -137,9 +137,9 @@ struct ToPult
     Mode_select     mode_select;    //! Текущий режим работы ГА модема
     Mode_data_agent mode_data;      //! Информация о режиме работы
 
-    quint8          depth;          //! Текущий глубина ГА модема
-    qint8           temperature;    //! Текущий температура ГА модема
-    qint8           voltage;        //! Текущий потребляемый вольтаж ГА модема
+    float           depth;          //! Текущий глубина ГА модема
+    float           temperature;    //! Текущий температура ГА модема
+    float           voltage;        //! Текущий потребляемый вольтаж ГА модема
     uint checksum;
 };
 

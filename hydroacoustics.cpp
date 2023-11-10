@@ -102,10 +102,10 @@ void Hydroacoustics::sendCmd1()
 
 void Hydroacoustics::settings()
 {
-//    char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
-//    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
-    char PUWV6[27] = "$PUWV6,1,1000,1,1,1,1*02\r\n"; // включаем передачу сообщений о состоянии модема
-    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 27);
+    char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
+    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
+//    char PUWV6[27] = "$PUWV6,1,1000,1,1,1,1*02\r\n"; // включаем передачу сообщений о состоянии модема
+//    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 27);
     ha.waitForBytesWritten();
 }
 
@@ -116,9 +116,12 @@ void Hydroacoustics::sendCmd2()// в этом сообщении настраи�
 //        qDebug() << "snsn";
      //   char PUWV6[18] = "$PUWVF,1,1,0*5E\r\n"; // Настройки пакетного режима 0 адрес
 //        char PUWV1[30] = "$PUWV1,0,1,0.,1,1,9.8067*34\r\n";
-        char PUWV1[30] = "$PUWV1,0,0,0.,1,1,9.8067*35\r\n";
-
-        ha.write(PUWV1, 30);
+//        char PUWV1[30] = "$PUWV1,0,0,0.,1,1,9.8067*35\r\n";
+        QByteArray array = request_PUWV1(salinity);
+        int size = array.size();
+        qDebug() << "Проверочка на размер array.size request_PUWV1 " << array.size();
+        char *PUWV1 = array.data();
+        ha.write(PUWV1, size);
         ha.waitForBytesWritten();
     }
     else
@@ -162,6 +165,7 @@ void Hydroacoustics::modeDirect()
 //    char PUWV2[18] = "$PUWV2,1,0,2*29\r\n"; //передача 1 прием 0
 //    qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
     QByteArray array = request_PUWV2(chD.txCh, chD.rxCh);
+    qDebug() << "Проверочка на размер array.size request_PUWV2 " << array.size();
     char *PUWV2 = array.data();
 
     qDebug()<<"bytes written :" << ha.write(PUWV2, 18);
@@ -540,7 +544,6 @@ QByteArray Hydroacoustics::request_PUWV2(int idModem,int idChennel)
 {
     //$PUWV2,1,0,2*29\r\n
     QByteArray command = "$PUWV2,";
-    QByteArray idMod = QByteArray::number(idModem);
     command.append(QByteArray::number(idModem));
     command.append(",");
     command.append(QByteArray::number(idChennel));
@@ -550,6 +553,27 @@ QByteArray Hydroacoustics::request_PUWV2(int idModem,int idChennel)
     qDebug() << "msg: " << msg;
     command.append(crc_MSG(msg));
     command.append("\r\n");
-    qDebug() << "command: " << command;
+    qDebug() << "command PUWV2: " << command;
+    return command;
+}
+
+QByteArray Hydroacoustics::request_PUWV1(float STY, int idModem, int idChennel, float gravityAcc)
+{
+//    char PUWV1[30] = "$PUWV1,0,0,0.,1,1,9.8067*35\r\n";
+    QByteArray command = "$PUWV1,";
+    command.append(QByteArray::number(idModem));
+    command.append(",");
+    command.append(QByteArray::number(idChennel));
+    command.append(",");
+    command.append(QByteArray::number(STY));
+    command.append(",1,1,");
+    command.append(QByteArray::number(gravityAcc));
+    command.append("*");
+    qint8 end = command.size();
+    QByteArray msg = command.mid(1, end-2);
+    qDebug() << "msg: " << msg;
+    command.append(crc_MSG(msg));
+    command.append("\r\n");
+    qDebug() << "command PUWV1: " << command;
     return command;
 };

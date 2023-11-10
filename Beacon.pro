@@ -17,8 +17,6 @@ SOURCES += \
         logger.cpp \
         main.cpp \
         nmea0183.cpp \
-        protocol/protocol_bort.cpp \
-        protocol/protocol_pc.cpp \
         widget.cpp
 
 
@@ -31,8 +29,6 @@ HEADERS += \
     nmea0183.h \
     protocol/pc_protocol.h \
     protocol/protocol.h \
-    protocol/protocol_bort.h \
-    protocol/protocol_pc.h \
     protocol/udp_protocol.h \
     widget.h
 

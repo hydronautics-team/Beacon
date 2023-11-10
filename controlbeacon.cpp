@@ -1,13 +1,18 @@
 #include "controlbeacon.h"
 #include "json_parser.h"
+#include "protocol/pc_protocol.h"
 
 
 ControlBeacon::ControlBeacon(QObject *parent)
 {
-//
-   Json_parser js;
-    protocolAUV protocolauv;
-   qDebug() << "js.set.comHydro: " <<js.set.comHydro;
+
+    beaconProtocol = new ControlSystem::PC_Protocol();
+    qDebug() << "-----start exchange with Pult";
+    beaconProtocol->startExchange();
+
+
+    Json_parser js;
+    qDebug() << "js.set.comHydro: " <<js.set.comHydro;
     hydro = new Hydroacoustics(js.set.comHydro);
 //    gps = new NMEA0183 (set.comGPS);
 
@@ -24,7 +29,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickIdle);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logDirect);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickRound);
-    connect(hydro, &Hydroacoustics::updateData, this, &ControlBeacon::update);
+//    connect(hydro, &Hydroacoustics::updateData, this, &ControlBeacon::update);
 
 
 
@@ -122,17 +127,55 @@ ControlBeacon::ControlBeacon(QObject *parent)
 
 void ControlBeacon::tick()
 {
-    if (m_state == statesMap.value(State::Idle)){
+
+    if (m_state == statesMap.value(State::Idle))
+    {
+
+       if (beaconProtocol->rec_data.mode_select == Mode_select::DIRECT)
+       {
+           chanel.txCh = beaconProtocol->rec_data.mode_data.direct.receiver.id;
+           chanel.rxCh = 0;
+           emit startDirectChannel(chanel);
+           emit startDirectConnection();
+       }
+       if (beaconProtocol->rec_data.mode_select == Mode_select::ROUND)
+       {
+           chRCB.Number = beaconProtocol->rec_data.mode_data.round.countBeacon;
+           chRCB.rxCh = 0;
+           chRCB.txCh1 = beaconProtocol->rec_data.mode_data.round.receiver1.id;
+           chRCB.txCh2 = beaconProtocol->rec_data.mode_data.round.receiver2.id;
+           chRCB.txCh3 = beaconProtocol->rec_data.mode_data.round.receiver3.id;
+           chRCB.txCh4 = beaconProtocol->rec_data.mode_data.round.receiver4.id;
+           emit startRoundChannel(chRCB);
+           emit startRoundR();
+       }
+     if (hydro->salinity != beaconProtocol->rec_data.salinity)
+     {
+         hydro->salinity = beaconProtocol->rec_data.salinity;
+         hydro->sendCmd2();
+     }
+    }
+    else if (m_state == "InitState")
+    {
 
     }
-    else if (m_state == "InitState"){
-
+    else if (m_state == "RoundR")
+    {
+        float timerr = beaconProtocol->rec_data.mode_data.round.dt;
+        if (timerr != timeQuest) emit updateTime(timerr);
+        if ((beaconProtocol->rec_data.mode_select == Mode_select::IDLE) or (beaconProtocol->rec_data.mode_select == Mode_select::DIRECT))
+        {
+            slotStop();
+        }
     }
-    else if (m_state == "RoundR") {
-//    qDebug () <<"RoundR";
-    }
-    else if (m_state == "DirectConnection"){
-
+    else if (m_state == "DirectConnection")
+    {
+        float timerr = beaconProtocol->rec_data.mode_data.direct.dt;
+        if (timerr != timeQuest) emit updateTime(timerr);
+        if ((beaconProtocol->rec_data.mode_select == Mode_select::IDLE) or (beaconProtocol->rec_data.mode_select == Mode_select::ROUND))
+        {
+            slotStop();
+        }
     }
 }
 
@@ -173,10 +216,31 @@ void ControlBeacon::slotStop()
 
 void ControlBeacon::update(uWave uwave)
 {
-    emit updateUpdate(uwave);
+    beaconProtocol->send_data.mode_select;
+    beaconProtocol->send_data.depth = hydro->uwave.puwv7.Depth_m;
+    beaconProtocol->send_data.temperature = hydro->uwave.puwv7.Temperature_C;
+    beaconProtocol->send_data.voltage = hydro->uwave.puwv7.VCC_V;
+    beaconProtocol->send_data.mode_data.direct.receiver.id = hydro->uwave.puwv3.rcCmdID;
+    beaconProtocol->send_data.mode_data.direct.receiver.nbr_rd = hydro->uwave.puwv3.counterAll;
+    beaconProtocol->send_data.mode_data.direct.receiver.nbr_td = hydro->uwave.counterACK;
+    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distance;
+    beaconProtocol->send_data.mode_data.round.receiver1.nbr_rd = hydro->uwave.puwv3.counterID1;
+    beaconProtocol->send_data.mode_data.round.receiver1.nbr_td = hydro->uwave.counterACK1;
+    beaconProtocol->send_data.mode_data.round.receiver1.tFlight = hydro->uwave.puwv3.distanceID1;
+    beaconProtocol->send_data.mode_data.round.receiver2.nbr_rd = hydro->uwave.puwv3.counterID2;
+    beaconProtocol->send_data.mode_data.round.receiver2.nbr_td = hydro->uwave.counterACK2;
+    beaconProtocol->send_data.mode_data.round.receiver2.tFlight = hydro->uwave.puwv3.distanceID2;
+    beaconProtocol->send_data.mode_data.round.receiver3.nbr_rd = hydro->uwave.puwv3.counterID3;
+    beaconProtocol->send_data.mode_data.round.receiver3.nbr_td = hydro->uwave.counterACK3;
+    beaconProtocol->send_data.mode_data.round.receiver3.tFlight = hydro->uwave.puwv3.distanceID3;
+    beaconProtocol->send_data.mode_data.round.receiver4.nbr_rd = hydro->uwave.puwv3.counterID4;
+    beaconProtocol->send_data.mode_data.round.receiver4.nbr_td = hydro->uwave.counterACK4;
+    beaconProtocol->send_data.mode_data.round.receiver4.tFlight = hydro->uwave.puwv3.distanceID4;
+
+//    emit updateUpdate(uwave);
 }
 
-void ControlBeacon::updateTime(double time)
+void ControlBeacon::updateTime(float time)
 {
     timeQuest = time*1000;
     qDebug() << "timeQuest: " << timeQuest;

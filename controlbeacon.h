@@ -8,11 +8,10 @@
 #include <QObject>
 #include <QTimer>
 #include "hydroacoustics.h"
-#include "protocol/protocol_bort.h"
-#include "protocol/protocol_pc.h"
+#include "protocol/pc_protocol.h"
 
 enum class  State : qint8 {
-    InitState,
+    InitState = 0,
     Idle,
     RoundR,
     DirectConnection
@@ -48,12 +47,12 @@ public slots:
     void slotStartRound(ChannelRound chW);
     void slotStop();
     void update(uWave uwave);
-    void updateTime(double time);
+    void updateTime(float time);
 public:
 
     Channel chanel;
     ChannelRound chRCB;
-    double timeQuest = 2000;
+    float timeQuest = 2000;
 
 
 public:
@@ -90,6 +89,7 @@ protected:
     QTimer timerRound;
     int dt = 100;
     State m_stateCode;
+    ControlSystem::PC_Protocol *beaconProtocol = nullptr;
 };
 
 #endif // CONTROLBEACON_H
