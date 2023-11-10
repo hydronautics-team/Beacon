@@ -5,6 +5,7 @@
 #include <QSerialPort>
 #include <QTimer>
 
+
 #pragma pack(push,1)
 
 struct Channel
@@ -20,6 +21,7 @@ struct ChannelRound
     int txCh3 = 0;
     int txCh4 = 0;
     int rxCh = 0;
+    int Number = 0;
 };
 
 struct PUWVE //ответ от модема на включение командного режима
@@ -85,6 +87,8 @@ struct uWave
     int counterACK = 0;
     int counterACK1 = 0;
     int counterACK2 = 0;
+    int counterACK3 = 0;
+    int counterACK4 = 0;
     QByteArray infoModem;
 };
 

@@ -39,9 +39,8 @@ public slots:
         udpProtocol->receiveData();
         rec_data = udpProtocol->rec_data;
         emit dataReceived();
-        rec_data.controlData.yaw;
 
-        static_cast<unsigned char>(rec_data.cSMode);
+        static_cast<unsigned char>(rec_data.mode_select);
     }
 public:
     ToPult send_data;

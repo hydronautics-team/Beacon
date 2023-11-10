@@ -161,11 +161,7 @@ void ControlBeacon::slotStartDirect(Channel ch)
 
 void ControlBeacon::slotStartRound(ChannelRound chW)
 {
-    chRCB.txCh1 = chW.txCh1;
-    chRCB.txCh2 = chW.txCh2;
-    chRCB.txCh3 = chW.txCh3;
-    chRCB.txCh4 = chW.txCh4;
-    chRCB.rxCh = chW.rxCh;
+    chRCB= chW;
     emit startRoundChannel(chRCB);
     emit startRoundR();
 }

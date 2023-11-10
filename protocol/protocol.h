@@ -3,166 +3,146 @@
 
 #include "stdint.h"
 #include <QDebug>
+#include <QtGlobal>
 
 #pragma pack(push,1)
 
-enum class e_CSMode : quint8
-{ //режим работы
-    MODE_MANUAL = 0, //ручной
-    MODE_AUTOMATED, //автоматизированный
-    MODE_AUTOMATIC, //автоматический
-    MODE_GROUP //групповой
-};
-
-enum class power_Mode : quint8
-{ //режим работы
-    MODE_2 = 0, //включены вычислитель, wifi, uwb
-    MODE_3, //включены вычислитель, wifi, uwb, гидроакустика
-    MODE_4, //включены вычислитель, wifi, uwb, гидроакустика, ВМА
-    MODE_5 //выключить вычислитель на 5 секунд и включить обратно
-};
-
-
-//структура данных, которая передается из Северова в Пульт
-//тут описаны данные, которые Пульт принимает от Северова
-
-struct ControlData
-{ //данные, которые идут с пульта в СУ
-    float yaw       = 0;
-    float pitch     = 0;
-    float roll      = 0;
-    float march     = 0;
-    float depth     = 0;
-    float lag       = 0;
-};
-
-struct ControlVMA
-{ //данные, которые идут на каждый ВМА
-    float VMA1     = 0;
-    float VMA2     = 0;
-    float VMA3     = 0;
-    float VMA4     = 0;
-    float VMA5     = 0;
-    float VMA6     = 0;
-};
-
-struct ControlContoursFlags
-{ //флаги замыкания контуров (если 1, то замкнуты, 0 - разомкнуты)
-    quint8 yaw = 1;
-    quint8 pitch = 1;
-    quint8 roll = 1;
-    quint8 march = 1;
-    quint8 depth = 1;
-    quint8 lag = 1;
-};
-
-
-struct AUVCurrentData
+/*!
+ * \brief Mode_select - структура, используемая для обозначения
+ * выбора режима работы ГА модемов.
+ */
+enum class Mode_select : quint8
 {
-    //!!тут все текущие параметры АНПА
-    quint8 modeReal = 0;//текущий режим
-    ControlContoursFlags controlReal;//текущее состояние контуров, чтобы проверить что сигнал с пульта был обработан
-    quint8 modeAUV_Real = 0;//текущий выбор модель/реальный НПА
-    ControlData ControlDataReal;//текущие курс, дифферент, крен, значения с имушки по сути
-    ControlVMA signalVMA_real;//управление на ВМА (текущие управляющие сигнлы на движители)
+    IDLE = 0,                     //! Стартовый режим работы
+    DIRECT,                       //! Режим персонального общения
+    ROUND                         //! Режим обмена нескольких модемов
 };
 
-
-struct HeaderSwap
+/*!
+ * \brief Coordinate - структура, используемая для обозначения
+ * информации о координат буёв
+ */
+struct Coordinate
 {
-    int senderID=0;
-    int receiverID=0;
-    int msgSize=0;
+    quint8          id;           //! id буя, чьи координаты записаны
+    quint8          fi;           //! Широта
+    quint8          lambda;       //! Долгота
 };
 
-struct DataAH127C
-{ //структура данных с датчика бесплатформенной системы ориентации
-    float yaw       = 0; //курс градусы +/- 180
-    float pitch     = 0; //...
-    float roll      = 0;
-
-    float X_accel   = 0;
-    float Y_accel   = 0;
-    float Z_accel   = 0;
-
-    float X_rate    = 0;
-    float Y_rate    = 0;
-    float Z_rate    = 0;
-
-    float X_magn    = 0;
-    float Y_magn    = 0;
-    float Z_magn    = 0;
-
-    float quat [4];
-};
-
-struct FlagAH127C_bort
+/*!
+ * \brief BeaconData - структура, используемая для общения гидроакустических
+ * модемов
+ */
+struct BeaconData
 {
-    quint8 startCalibration = 0;
-    quint8 endCalibration = 0;
+    qint8           id;             //! id буя
+    quint8          nbr_rd;         //! Число полученных ответ
+    quint8          nbr_td;         //! Число отправленных сообщений
+    quint8          tFlight;        //! Время от отправки до получения
 };
 
-struct FlagAH127C_pult
+/*!
+ * \brief Direct_agent - структура, используемая в аппарате для
+ * формирования данных об гидроакустических модемов в режиме round.
+ */
+struct Direct_agent
 {
-    quint8 initCalibration = 0;
-    quint8 saveCalibration = 0;
+    float           dt;           //! Период запросов
+    BeaconData      receiver;     //! Информация о получателе сообщений
 };
 
-struct DataPressure
-{ //структура данных с датчика давления
-    float temperature = 0; //Temperature returned in deg C.
-    float depth       = 0; //Depth returned in meters
-    float pressure    = 0; // Pressure returned in mbar or mbar*conversion rate.
-};
-
-struct DataUWB
-{ //структура данных с сверхширокополосного модуля
-
-    uint8_t error_code = 0;
-    uint16_t connection_field = 0;
-    float locationX = 0; //координата аппарата по оси X
-    float locationY = 0; //координата аппарата по оси Y
-    float distanceToBeacon[4]; //расстоние до i-го маяка
-    float distanceToAgent[10]; //расстояние до i-го агента
-};
-
-struct PultUWB
+/*!
+ * \brief Round_agent - структура, используемая в аппарате для
+ * формирования данных об гидроакустических модемов в режиме round.
+ */
+struct Round_agent
 {
-    float beacon_x[3];
-    float beacon_y[3];
+    float           dt;             //! Период запросов
+    quint8          countBeacon;    //! Число опрашиваемых буёв
+    BeaconData      receiver1;      //! Информация о получателе сообщений 1
+    BeaconData      receiver2;      //! Информация о получателе сообщений 2
+    BeaconData      receiver3;      //! Информация о получателе сообщений 3
+    BeaconData      receiver4;      //! Информация о получателе сообщений 4
 };
 
-struct ToPult
+/*!
+ * \brief Mode_data_agent - структура, используемая для формирования
+ * посылок в агенте. Несет информацию о режиме работы ГА модема.
+ */
+struct Mode_data_agent
 {
-    ToPult(int auvID=0)
-    {
-        headerSwap.senderID = auvID;
-        headerSwap.receiverID = 0;
-        headerSwap.msgSize = sizeof (ToPult);
-    }
-    HeaderSwap headerSwap;
-    AUVCurrentData auvData;// данные о текущих параметрах
-    DataAH127C dataAH127C;// данные с БСО
-    DataPressure dataPressure; //данные с датчика давления
-    DataUWB dataUWB;//данные с UWB
-    FlagAH127C_bort flagAH127C_bort;
-    uint checksum;
-
+    Direct_agent    direct;
+    Round_agent     round;
 };
 
-//структура данных, которая передается из пульта в АНПА
+
+/*!
+ * \brief Round_gui - структура, используемая в пульте для задания общения
+ * гидроакустических модемов в режиме round.
+ */
+struct Round_gui
+{
+    float           dt;             //! Период запросов
+    quint8          countBeacon;    //! Число опрашиваемых буёв
+    Coordinate      receiver1;      //! Информация о получателе сообщений 1
+    Coordinate      receiver2;      //! Информация о получателе сообщений 2
+    Coordinate      receiver3;      //! Информация о получателе сообщений 3
+    Coordinate      receiver4;      //! Информация о получателе сообщений 4
+};
+
+/*!
+ * \brief Direct_gui - структура, используемая в пульте для задания общения
+ * гидроакустических модемов в режиме direct.
+ */
+struct Direct_gui
+{
+    float           dt;             //! Период запросов
+    Coordinate      receiver;       //! Информация о получателе сообщений
+};
+
+/*!
+ * \brief Mode_data_gui - структура, используемая для формирования
+ * посылок в пульте. Несет информацию о режиме работы ГА модема.
+ */
+struct Mode_data_gui
+{
+    Direct_gui      direct;
+    Round_gui       round;
+};
+
+
+
+
+
+/*!
+ * \brief BeaconSetup - структура, формируемая в пульте и передаваемая
+ * на агента.
+ */
 struct FromPult
 {
-    ControlData controlData; //данные, которые идут с пульта при замыканиии контуров
-    e_CSMode cSMode = e_CSMode::MODE_MANUAL; //режим работы
-    PultUWB pultUWB;
-    ControlContoursFlags controlContoursFlags; //флаги замыкания контуров (если больше 0, то замкнуты
-    quint8 modeAUV_selection;//текущий выбор модель/реальный НПА
-    power_Mode pMode = power_Mode::MODE_2; //режим работы системы питания, структура с желаемыми параметрами системы питания
-    FlagAH127C_pult flagAH127C_pult;
-    uint checksum;
+    Mode_select     mode_select;    //! Выбранный режим работы ГА модема
+    Mode_data_gui   mode_data;      //! Информация о режиме работы
 
+    quint8          salinity;       //! Информация о солености воды
+    quint8          salinityFlag;   //! Флаг обновления солености воды
+    uint checksum;
 };
+
+/*!
+ * \brief NavigationData_beacon - структура, формируемая на агенте и передаваемая
+ * на пульт
+ */
+struct ToPult
+{
+    Mode_select     mode_select;    //! Текущий режим работы ГА модема
+    Mode_data_agent mode_data;      //! Информация о режиме работы
+
+    quint8          depth;          //! Текущий глубина ГА модема
+    qint8           temperature;    //! Текущий температура ГА модема
+    qint8           voltage;        //! Текущий потребляемый вольтаж ГА модема
+    uint checksum;
+};
+
 
 #pragma pack (pop)
 

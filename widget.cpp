@@ -75,6 +75,7 @@ void Widget::updateModeRound()
     chRW.txCh3 = ui->spinBoxTxCh3->value();
     chRW.txCh4 = ui->spinBoxTxCh4->value();
     chRW.rxCh = ui->spinBoxRxCh->value();
+    chRW.Number = ui->spinBoxNumber->value();
     emit startRoundR(chRW);
 }
 
