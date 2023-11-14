@@ -125,6 +125,7 @@ struct FromPult
 
     float          salinity = 0;       //! Информация о солености воды
     float          salinityFlag = 0;   //! Флаг обновления солености воды
+    uint           distance_real = 0; //! Расстояние реальное от 0 точки отсчета
     uint checksum;
 };
 

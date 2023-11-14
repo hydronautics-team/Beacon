@@ -128,6 +128,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
 void ControlBeacon::tick()
 {
 
+    hydro->uwave.distance_real = beaconProtocol->rec_data.distance_real;
     if (m_state == statesMap.value(State::Idle))
     {
 
@@ -236,6 +237,7 @@ void ControlBeacon::update(uWave uwave)
     beaconProtocol->send_data.mode_data.round.receiver4.nbr_rd = hydro->uwave.puwv3.counterID4;
     beaconProtocol->send_data.mode_data.round.receiver4.nbr_td = hydro->uwave.counterACK4;
     beaconProtocol->send_data.mode_data.round.receiver4.tFlight = hydro->uwave.puwv3.distanceID4;
+
 
 //    emit updateUpdate(uwave);
 }
