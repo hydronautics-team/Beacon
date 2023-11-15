@@ -25,8 +25,8 @@ enum class Mode_select : quint8
 struct Coordinate
 {
     quint8          id;           //! id буя, чьи координаты записаны
-    quint8          fi;           //! Широта
-    quint8          lambda;       //! Долгота
+    float           x;
+    float           y;
 };
 
 /*!
@@ -125,7 +125,7 @@ struct FromPult
 
     float          salinity = 0;       //! Информация о солености воды
     float          salinityFlag = 0;   //! Флаг обновления солености воды
-    uint           distance_real = 0; //! Расстояние реальное от 0 точки отсчета
+    float          distance_real = 0; //! Расстояние реальное от 0 точки отсчета
     uint checksum;
 };
 
@@ -141,7 +141,7 @@ struct ToPult
     float           depth;          //! Текущий глубина ГА модема
     float           temperature;    //! Текущий температура ГА модема
     float           voltage;        //! Текущий потребляемый вольтаж ГА модема
-    uint checksum;
+    uint            checksum;
 };
 
 

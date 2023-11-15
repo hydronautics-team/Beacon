@@ -29,7 +29,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickIdle);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logDirect);
     connect(hydro, &Hydroacoustics::updateData, &logger, &Logger::logTickRound);
-//    connect(hydro, &Hydroacoustics::updateData, this, &ControlBeacon::update);
+    connect(hydro, &Hydroacoustics::updateData, this, &ControlBeacon::update);
 
 
 
@@ -131,7 +131,7 @@ void ControlBeacon::tick()
     hydro->uwave.distance_real = beaconProtocol->rec_data.distance_real;
     if (m_state == statesMap.value(State::Idle))
     {
-
+//       qDebug() << "захожу в тик, тик-тик";
        if (beaconProtocol->rec_data.mode_select == Mode_select::DIRECT)
        {
            chanel.txCh = beaconProtocol->rec_data.mode_data.direct.receiver.id;
@@ -219,8 +219,11 @@ void ControlBeacon::update(uWave uwave)
 {
     beaconProtocol->send_data.mode_select;
     beaconProtocol->send_data.depth = hydro->uwave.puwv7.Depth_m;
+    qDebug() << "hydro->uwave.puwv7.Depth_m: " << beaconProtocol->send_data.depth;
     beaconProtocol->send_data.temperature = hydro->uwave.puwv7.Temperature_C;
+    qDebug() << "beaconProtocol->send_data.temperature: " << beaconProtocol->send_data.temperature;
     beaconProtocol->send_data.voltage = hydro->uwave.puwv7.VCC_V;
+    qDebug() << "beaconProtocol->send_data.voltage: " <<beaconProtocol->send_data.voltage;
     beaconProtocol->send_data.mode_data.direct.receiver.id = hydro->uwave.puwv3.rcCmdID;
     beaconProtocol->send_data.mode_data.direct.receiver.nbr_rd = hydro->uwave.puwv3.counterAll;
     beaconProtocol->send_data.mode_data.direct.receiver.nbr_td = hydro->uwave.counterACK;
