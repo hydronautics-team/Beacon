@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QSerialPort>
 #include <QTimer>
+#include "json_parser.h"
 
 
 #pragma pack(push,1)

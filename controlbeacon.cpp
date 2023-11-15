@@ -1,5 +1,5 @@
 #include "controlbeacon.h"
-#include "json_parser.h"
+
 #include "protocol/pc_protocol.h"
 
 
@@ -12,7 +12,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
 
 
     Json_parser js;
-    qDebug() << "js.set.comHydro: " <<js.set.comHydro;
+//    qDebug() << "js.set.comHydro: " <<js.set.comHydro;
     hydro = new Hydroacoustics(js.set.comHydro);
 //    gps = new NMEA0183 (set.comGPS);
 

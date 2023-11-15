@@ -27,4 +27,5 @@ void Json_parser::parser(QString val)
     set.sender_ip = json["sender.ip"].toString();
     set.sender_port = json["sender.port"].toInt();
     set.sender_frequency = json["sender.frequency"].toDouble();
+    set.mode_package_delivery = json["mode_package_delivery"].toBool();
 }

@@ -19,6 +19,7 @@ struct Settings
     QString sender_ip;
     int sender_port;
     float sender_frequency;
+    bool mode_package_delivery = false; //Выбор режима как часто отправлять посылку о состоянии модема, если 0, то при отправке, если  1, то каждые 3 секунды
 };
 
 class Json_parser

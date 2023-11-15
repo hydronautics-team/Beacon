@@ -1,5 +1,6 @@
 #include "hydroacoustics.h"
 #include <QDebug>
+#include "json_parser.h"
 
 Hydroacoustics::Hydroacoustics(QString portName, int baudRate,
                                QObject *parent) : QObject(parent)
@@ -11,6 +12,7 @@ Hydroacoustics::Hydroacoustics(QString portName, int baudRate,
     ha.setParity(QSerialPort::NoParity);
     ha.setFlowControl(QSerialPort::NoFlowControl);
     ha.open(QIODevice::ReadWrite);
+
 
     if (ha.open(QIODevice::ReadWrite)){
         qDebug()<<" port was opened";
@@ -102,10 +104,19 @@ void Hydroacoustics::sendCmd1()
 
 void Hydroacoustics::settings()
 {
-    char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
-    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
-//    char PUWV6[27] = "$PUWV6,1,1000,1,1,1,1*02\r\n"; // включаем передачу сообщений о состоянии модема
-//    qDebug()  <<"bytes written :"<< ha.write(PUWV6, 27);
+    Json_parser json;
+    qDebug() << "json.set.mode_package_delivery: " << json.set.mode_package_delivery;
+    if (json.set.mode_package_delivery == 0)
+    {
+        char PUWV6[24] = "$PUWV6,1,1,1,1,1,1*32\r\n"; // включаем передачу сообщений о состоянии модема
+        qDebug()  <<"bytes written :"<< ha.write(PUWV6, 24);
+    }
+    else
+    {
+        char PUWV6[27] = "$PUWV6,1,1000,1,1,1,1*02\r\n"; // включаем передачу сообщений о состоянии модема
+        qDebug()  <<"bytes written :"<< ha.write(PUWV6, 27);
+    }
+
     ha.waitForBytesWritten();
 }
 
