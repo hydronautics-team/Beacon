@@ -1,5 +1,6 @@
-QT += core network \
-    widgets
+#QT += core network \
+#    widgets
+QT += core network
 QT += serialport
 QT += core gui
 
@@ -34,8 +35,8 @@ HEADERS += \
 
 DISTFILES +=
 
-FORMS += \
-    widget.ui
+#FORMS += \
+#    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -241,6 +241,8 @@ void ControlBeacon::update(uWave uwave)
     beaconProtocol->send_data.mode_data.round.receiver4.nbr_td = hydro->uwave.counterACK4;
     beaconProtocol->send_data.mode_data.round.receiver4.tFlight = hydro->uwave.puwv3.distanceID4;
 
+    qDebug() << &(beaconProtocol->rec_data.mode_select);
+    qDebug() << "distance_real" << beaconProtocol->rec_data.distance_real;
 
 //    emit updateUpdate(uwave);
 }
