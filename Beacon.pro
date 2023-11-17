@@ -1,5 +1,5 @@
-#QT += core network \
-#    widgets
+QT += core network \
+    widgets
 QT += core network
 QT += serialport
 QT += core gui
