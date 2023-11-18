@@ -38,7 +38,7 @@ struct BeaconData
     qint8           id = 1;             //! id буя
     quint8          nbr_rd = 0;         //! Число полученных ответ
     quint8          nbr_td = 0;         //! Число отправленных сообщений
-    quint8          tFlight = 0;        //! Время от отправки до получения
+    float          tFlight = 0;        //! Время от отправки до получения
 };
 
 /*!
@@ -141,6 +141,7 @@ struct ToPult
     float           depth;          //! Текущий глубина ГА модема
     float           temperature;    //! Текущий температура ГА модема
     float           voltage;        //! Текущий потребляемый вольтаж ГА модема
+    uint            WARNING = 0;
     uint            checksum;
 };
 

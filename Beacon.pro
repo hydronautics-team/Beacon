@@ -35,8 +35,8 @@ HEADERS += \
 
 DISTFILES +=
 
-#FORMS += \
-#    widget.ui
+FORMS += \
+    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

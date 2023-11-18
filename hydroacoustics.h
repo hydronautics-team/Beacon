@@ -61,6 +61,11 @@ struct PUWV3
     float distanceID2 = 0;
     float distanceID3 = 0;
     float distanceID4 = 0;
+    float tempID1 = 0;
+    float tempID2 = 0;
+    float tempID3 = 0;
+    float tempID4 = 0;
+    float temp = 0;
     float distance = 0;
     int counterID1 = 0;
     int counterID2 = 0;
@@ -92,6 +97,7 @@ struct uWave
     int counterACK4 = 0;
     QByteArray infoModem;
     uint distance_real = 0;
+    uint warning = 0;
 };
 
 

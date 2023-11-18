@@ -85,6 +85,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     });
     connect(DirectConnection,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartDirect();
+        qDebug() << "timeQuest: " << timeQuest;
         timerDirect.start(timeQuest);
 
     });
@@ -96,6 +97,7 @@ ControlBeacon::ControlBeacon(QObject *parent)
     connect(RoundR,&QState::entered,this, [this](){ //входим в состояние SendCmd1 и запускаем таймер
         logger.logStartRoundR();
 //        hydro->timerRound.start(2000);
+        qDebug() << "timeQuest: " << timeQuest;
         timerRound.start(timeQuest);
     });
     connect(RoundR, &QState::exited,this, [this](){ //выходим из состояния SendCmd1 и выключаем таймер
@@ -136,17 +138,28 @@ void ControlBeacon::tick()
        {
            chanel.txCh = beaconProtocol->rec_data.mode_data.direct.receiver.id;
            chanel.rxCh = 0;
+           timeQuest =  beaconProtocol->rec_data.mode_data.direct.dt*1000;
            emit startDirectChannel(chanel);
            emit startDirectConnection();
+
        }
        if (beaconProtocol->rec_data.mode_select == Mode_select::ROUND)
        {
+           timeQuest =  beaconProtocol->rec_data.mode_data.round.dt*1000;
            chRCB.Number = beaconProtocol->rec_data.mode_data.round.countBeacon;
            chRCB.rxCh = 0;
            chRCB.txCh1 = beaconProtocol->rec_data.mode_data.round.receiver1.id;
+           qDebug() << " beaconProtocol->rec_data.mode_data.round.receiver1.id:"<<  beaconProtocol->rec_data.mode_data.round.receiver1.id;
            chRCB.txCh2 = beaconProtocol->rec_data.mode_data.round.receiver2.id;
+           qDebug() << " beaconProtocol->rec_data.mode_data.round.receiver2.id:"<<  beaconProtocol->rec_data.mode_data.round.receiver2.id;
            chRCB.txCh3 = beaconProtocol->rec_data.mode_data.round.receiver3.id;
+           qDebug() << " beaconProtocol->rec_data.mode_data.round.receiver3.id:"<<  beaconProtocol->rec_data.mode_data.round.receiver3.id;
            chRCB.txCh4 = beaconProtocol->rec_data.mode_data.round.receiver4.id;
+           qDebug() << " beaconProtocol->rec_data.mode_data.round.receiver4.id:"<<  beaconProtocol->rec_data.mode_data.round.receiver4.id;
+           chRCB.txCh1 = 1;
+           chRCB.txCh2 = 2;
+           chRCB.txCh3 = 3;
+           chRCB.txCh4 = 4;
            emit startRoundChannel(chRCB);
            emit startRoundR();
        }
@@ -158,7 +171,8 @@ void ControlBeacon::tick()
     }
     else if (m_state == "InitState")
     {
-
+        //float timerr = beaconProtocol->rec_data.mode_data.round.dt;
+        //if (timerr != timeQuest) emit updateTime(timerr);
     }
     else if (m_state == "RoundR")
     {
@@ -219,30 +233,80 @@ void ControlBeacon::update(uWave uwave)
 {
     beaconProtocol->send_data.mode_select;
     beaconProtocol->send_data.depth = hydro->uwave.puwv7.Depth_m;
-    qDebug() << "hydro->uwave.puwv7.Depth_m: " << beaconProtocol->send_data.depth;
+    qDebug() << "Depth_m: " << beaconProtocol->send_data.depth;
     beaconProtocol->send_data.temperature = hydro->uwave.puwv7.Temperature_C;
-    qDebug() << "beaconProtocol->send_data.temperature: " << beaconProtocol->send_data.temperature;
+    qDebug() << "temperature: " << beaconProtocol->send_data.temperature;
     beaconProtocol->send_data.voltage = hydro->uwave.puwv7.VCC_V;
-    qDebug() << "beaconProtocol->send_data.voltage: " <<beaconProtocol->send_data.voltage;
+    qDebug() << "voltage: " <<beaconProtocol->send_data.voltage;
     beaconProtocol->send_data.mode_data.direct.receiver.id = hydro->uwave.puwv3.rcCmdID;
+    qDebug() << "puwv3.rcCmdID: " << hydro->uwave.puwv3.rcCmdID;
     beaconProtocol->send_data.mode_data.direct.receiver.nbr_rd = hydro->uwave.puwv3.counterAll;
+    qDebug() << "hydro->uwave.puwv3.counterAll: " << hydro->uwave.puwv3.counterAll;
     beaconProtocol->send_data.mode_data.direct.receiver.nbr_td = hydro->uwave.counterACK;
-    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distance;
+    qDebug() << "hydro->uwave.counterACK: " << hydro->uwave.counterACK;
+    if (beaconProtocol->rec_data.mode_data.direct.receiver.id == 1)
+    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distanceID1;
+    if (beaconProtocol->rec_data.mode_data.direct.receiver.id == 2)
+    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distanceID2;
+    if (beaconProtocol->rec_data.mode_data.direct.receiver.id == 3)
+    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distanceID3;
+    if (beaconProtocol->rec_data.mode_data.direct.receiver.id == 4)
+    beaconProtocol->send_data.mode_data.direct.receiver.tFlight = hydro->uwave.puwv3.distanceID4;
+    qDebug() << "hydro->uwave.puwv3.distance: " << hydro->uwave.puwv3.distance;
     beaconProtocol->send_data.mode_data.round.receiver1.nbr_rd = hydro->uwave.puwv3.counterID1;
+    qDebug() << "hydro->uwave.puwv3.counterID1: " << hydro->uwave.puwv3.counterID1;
     beaconProtocol->send_data.mode_data.round.receiver1.nbr_td = hydro->uwave.counterACK1;
+    qDebug() << "hydro->uwave.counterACK1: " << hydro->uwave.counterACK1;
     beaconProtocol->send_data.mode_data.round.receiver1.tFlight = hydro->uwave.puwv3.distanceID1;
+    qDebug() << "hydro->uwave.puwv3.distanceID1: " << hydro->uwave.puwv3.distanceID1;
     beaconProtocol->send_data.mode_data.round.receiver2.nbr_rd = hydro->uwave.puwv3.counterID2;
+    qDebug() << "hydro->uwave.puwv3.counterID2: " << hydro->uwave.puwv3.counterID2;
     beaconProtocol->send_data.mode_data.round.receiver2.nbr_td = hydro->uwave.counterACK2;
+    qDebug() << "hydro->uwave.counterACK2: " << hydro->uwave.counterACK2;
     beaconProtocol->send_data.mode_data.round.receiver2.tFlight = hydro->uwave.puwv3.distanceID2;
+    qDebug() << "hydro->uwave.puwv3.distanceID2: " << hydro->uwave.puwv3.distanceID2;
     beaconProtocol->send_data.mode_data.round.receiver3.nbr_rd = hydro->uwave.puwv3.counterID3;
+    qDebug() << "hydro->uwave.puwv3.counterID3: " << hydro->uwave.puwv3.counterID3;
     beaconProtocol->send_data.mode_data.round.receiver3.nbr_td = hydro->uwave.counterACK3;
+    qDebug() << "hydro->uwave.counterACK3: " << hydro->uwave.counterACK3;
     beaconProtocol->send_data.mode_data.round.receiver3.tFlight = hydro->uwave.puwv3.distanceID3;
+    qDebug() << "hydro->uwave.puwv3.distanceID3: " << hydro->uwave.puwv3.distanceID3;
     beaconProtocol->send_data.mode_data.round.receiver4.nbr_rd = hydro->uwave.puwv3.counterID4;
+    qDebug() << "hydro->uwave.puwv3.counterID4: " << hydro->uwave.puwv3.counterID4;
     beaconProtocol->send_data.mode_data.round.receiver4.nbr_td = hydro->uwave.counterACK4;
+    qDebug() << "hydro->uwave.counterACK4: " << hydro->uwave.counterACK4;
     beaconProtocol->send_data.mode_data.round.receiver4.tFlight = hydro->uwave.puwv3.distanceID4;
+    qDebug() << "hydro->uwave.puwv3.distanceID4: " << hydro->uwave.puwv3.distanceID4;
 
     qDebug() << &(beaconProtocol->rec_data.mode_select);
     qDebug() << "distance_real" << beaconProtocol->rec_data.distance_real;
+
+    if ((hydro->uwave.puwv3.temp < -5) or (hydro->uwave.puwv3.temp >40))
+    {
+        hydro->uwave.warning ++;
+        beaconProtocol->send_data.WARNING = hydro->uwave.warning;
+    }
+    if ((hydro->uwave.puwv3.tempID1 < -5) or (hydro->uwave.puwv3.tempID1 >40))
+    {
+        hydro->uwave.warning ++;
+        beaconProtocol->send_data.WARNING = hydro->uwave.warning;
+    }
+    if ((hydro->uwave.puwv3.tempID2 < -5) or (hydro->uwave.puwv3.tempID2 >40))
+    {
+        hydro->uwave.warning ++;
+        beaconProtocol->send_data.WARNING = hydro->uwave.warning;
+    }
+    if ((hydro->uwave.puwv3.tempID3 < -5) or (hydro->uwave.puwv3.tempID3 >40))
+    {
+        hydro->uwave.warning ++;
+        beaconProtocol->send_data.WARNING = hydro->uwave.warning;
+    }
+    if ((hydro->uwave.puwv3.tempID4 < -5) or (hydro->uwave.puwv3.tempID4 >40))
+    {
+        hydro->uwave.warning ++;
+        beaconProtocol->send_data.WARNING = hydro->uwave.warning;
+    }
+    qDebug() << "WARNING: " << beaconProtocol->send_data.WARNING ;
 
 //    emit updateUpdate(uwave);
 }
@@ -250,7 +314,7 @@ void ControlBeacon::update(uWave uwave)
 void ControlBeacon::updateTime(float time)
 {
     timeQuest = time*1000;
-    qDebug() << "timeQuest: " << timeQuest;
+//    qDebug() << "timeQuest: " << timeQuest;
 }
 
 

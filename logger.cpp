@@ -68,7 +68,12 @@ void Logger::logTickRound(uWave uwave)
                   uwave.puwv4.counterID4  << ", " << \
                   uwave.puwv4.counterAll  << ", " << \
                   uwave.counterACK << ", " << \
-                  uwave.distance_real \
+                  uwave.puwv3.tempID1 << ", " << \
+                  uwave.puwv3.tempID2 << ", " << \
+                  uwave.puwv3.tempID3 << ", " << \
+                  uwave.puwv3.tempID4 << ", " << \
+                  uwave.distance_real  << ", " << \
+                  uwave.warning \
                   <<"\n";
     }
 }
@@ -109,7 +114,12 @@ void Logger::logDirect(uWave uwave)
                   uwave.puwv4.counterID4  << ", " << \
                   uwave.puwv4.counterAll  << ", " << \
                   uwave.counterACK << ", " << \
-                  uwave.distance_real \
+                  uwave.puwv3.tempID1 << ", " << \
+                  uwave.puwv3.tempID2 << ", " << \
+                  uwave.puwv3.tempID3 << ", " << \
+                  uwave.puwv3.tempID4 << ", " << \
+                  uwave.distance_real << ", " << \
+                  uwave.warning \
                   <<"\n";
     }
 }
@@ -179,7 +189,7 @@ void Logger::logStartRoundR()
             qDebug()<< fileRound.errorString() << " " << fileRound.error();
         }
         QTextStream stream(&fileRound);
-         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK, distance_real\n";
+         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK, distance_real, tempID1, tempID2, tempID3, tempID4, WARNING\n";
     }
 }
 
@@ -202,7 +212,7 @@ void Logger::logStartDirect()
             qDebug()<< fileDirect.errorString() << " " << fileDirect.error();
         }
         QTextStream stream(&fileDirect);
-         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK, distance_real\n";
+         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK, distance_real, tempID1, tempID2, tempID3, tempID4, WARNING\n";
     }
 }
 
