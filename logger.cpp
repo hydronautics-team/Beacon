@@ -68,11 +68,11 @@ void Logger::logTickRound(uWave uwave)
                   uwave.puwv4.counterID4  << ", " << \
                   uwave.puwv4.counterAll  << ", " << \
                   uwave.counterACK << ", " << \
+                  uwave.distance_real  << ", " << \
                   uwave.puwv3.tempID1 << ", " << \
                   uwave.puwv3.tempID2 << ", " << \
                   uwave.puwv3.tempID3 << ", " << \
                   uwave.puwv3.tempID4 << ", " << \
-                  uwave.distance_real  << ", " << \
                   uwave.warning \
                   <<"\n";
     }
@@ -114,11 +114,11 @@ void Logger::logDirect(uWave uwave)
                   uwave.puwv4.counterID4  << ", " << \
                   uwave.puwv4.counterAll  << ", " << \
                   uwave.counterACK << ", " << \
+                  uwave.distance_real << ", " << \
                   uwave.puwv3.tempID1 << ", " << \
                   uwave.puwv3.tempID2 << ", " << \
                   uwave.puwv3.tempID3 << ", " << \
                   uwave.puwv3.tempID4 << ", " << \
-                  uwave.distance_real << ", " << \
                   uwave.warning \
                   <<"\n";
     }
