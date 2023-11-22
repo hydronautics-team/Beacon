@@ -96,6 +96,7 @@ struct uWave
     int counterACK3 = 0;
     int counterACK4 = 0;
     QByteArray infoModem;
+    QString infoLog;
     uint distance_real = 0;
     uint warning = 0;
 };

@@ -78,6 +78,18 @@ void Logger::logTickRound(uWave uwave)
     }
 }
 
+void Logger::logTickLog(uWave uwave)
+{
+    if(wrilelogLog)
+    {
+        qDebug() << "uwave.infoLog: " << uwave.infoLog;
+        QTextStream stream (&fileLog);
+        stream <<
+                  uwave.infoLog
+        <<"\n";
+    }
+}
+
 void Logger::logDirect(uWave uwave)
 {
     if(writelogDirect)
@@ -121,6 +133,30 @@ void Logger::logDirect(uWave uwave)
                   uwave.puwv3.tempID4 << ", " << \
                   uwave.warning \
                   <<"\n";
+    }
+}
+
+void Logger::logStartLog()
+{
+    if (wrilelogLog == false)
+    {
+        QString fileName = QString("log-")+QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+        qDebug()<<fileName;
+        fileLog.setFileName(fileName);
+
+        if (fileLog.open(QIODevice::ReadWrite | QIODevice::Text))
+        {
+            qDebug()<<"fileGPS is opened";
+            wrilelogLog = true;
+        }
+        else
+        {
+            qDebug()<< fileLog.errorString() << " " << fileLog.error();
+        }
+//        QTextStream stream(&fileLog);
+//        stream << "lat, NS, long, EW, time, status, posMode\n";
+
     }
 }
 
@@ -233,6 +269,15 @@ void Logger::logStopIdle()
         writeLogIdle = false;
         fileIdle.close();
         qDebug() << "fileIdle.close";
+    }
+}
+
+void Logger::logStopLog()
+{
+    if (wrilelogLog == true)
+    {
+        wrilelogLog = false;
+        fileLog.close();
     }
 }
 

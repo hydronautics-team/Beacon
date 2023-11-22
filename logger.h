@@ -17,13 +17,16 @@ public slots:
     void logTickGPS(GPS gps);
     void logTickIdle(uWave uwave);
     void logTickRound(uWave uwave);
+    void logTickLog(uWave uwave);
     void logDirect(uWave uwave);
+    void logStartLog();
     void logStartGPS();
     void logStartIdle();
     void logStartRoundR();
     void logStartDirect();
     void logStopGPS();
     void logStopIdle();
+    void logStopLog();
     void logStopRoundR();
     void logStopDirect();
 protected:
@@ -31,7 +34,9 @@ protected:
     bool writeLogIdle = false;
     bool writelogRoundR = false;
     bool writelogDirect = false;
+    bool wrilelogLog = false;
     QFile fileGPS;
+    QFile fileLog;
     QFile fileIdle;
     QFile fileRound;
     QFile fileDirect;

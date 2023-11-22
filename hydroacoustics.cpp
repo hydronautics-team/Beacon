@@ -32,6 +32,8 @@ Hydroacoustics::Hydroacoustics(QString portName, int baudRate,
                 if (end == 10)
                 {
                     uwave.infoModem = ha_buffer;
+                    uwave.infoLog = ha_buffer;
+                    emit updateData(uwave);
                     parseBuffer();
                 }
         }
