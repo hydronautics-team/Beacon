@@ -1,21 +1,25 @@
 #include "logger.h"
 
+//using namespace NMEA;
+
 Logger::Logger(QObject *parent) : QObject{parent}
 {
-
+    Json_parser js;
+    gpsS = new NMEA::NMEA0183 (js.set.comGPS);
 }
 
-void Logger::logTickGPS(GPS gps)
+void Logger::logTickGPS(NMEA::NMEA0183* gps)
 {
     if (writeLogGPS)
     {
         gpsS = gps;
         QTextStream stream (&fileGPS);
-//        stream << gps.gll.lat << ", " << gps.gll.NS << ", " << gps.gll.long_ << ", " << gps.gll.EW << ", " << \
-//                  gps.gll.time.toString("hh:mm:ss.z") << ", " << gps.gll.status << ", " << gps.gll.posMode << "\n";
-        stream << gps.rms.time.toString("hh:mm:ss.z") << ", " << gps.rms.status << ", " << gps.rms.lat << ", " << gps.rms.NS << ", " << \
-                  gps.rms.long_ << ", " << gps.rms.EW << ", " << gps.rms.spd << ", " << gps.rms.cog << ", " <<\
-                  gps.rms.date.toString("dd.MM.yy") << ", " << gps.rms.mv << ", " << gps.rms.mvEW << ", " << gps.rms.posMode << ", " << gps.rms.counter <<  "\n";
+//        stream << gps->gll.lat << ", " << gps->gll.NS << ", " << gps->gll.long_ << ", " << gps->gll.EW << ", " << \
+//                  gps->gll.time.toString("hh:mm:ss.z") << ", " << gps->gll.status << ", " << gps->gll.posMode << "\n";
+
+        stream << gps->rms.time.toString("hh:mm:ss.z") << ", " << gps->rms.status << ", " << gps->rms.lat << ", " << gps->rms.NS << ", " << \
+                  gps->rms.long_ << ", " << gps->rms.EW << ", " << gps->rms.spd << ", " << gps->rms.cog << ", " <<\
+                  gps->rms.date.toString("dd.MM.yy") << ", " << gps->rms.mv << ", " << gps->rms.mvEW << ", " << gps->rms.posMode << ", " << gps->rms.counter <<  "\n";
     }
 }
 
@@ -23,10 +27,9 @@ void Logger::logTickIdle(uWave uwave)
 {
     if(writeLogIdle)
     {
-
         QTextStream stream (&fileIdle);
-        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << gpsS.rms.lat << ", "  << gpsS.rms.NS << ", " << \
-                  gpsS.rms.long_ << ", " << gpsS.rms.EW << ", " <<  gpsS.rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
+        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << gpsS->rms.lat << ", "  << gpsS->rms.NS << ", " << \
+                  gpsS->rms.long_ << ", " << gpsS->rms.EW << ", " <<  gpsS->rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
                   uwave.counterACK << "\n";
     }
@@ -38,10 +41,10 @@ void Logger::logTickRound(uWave uwave)
     {
 
         QTextStream stream (&fileRound);
-        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS.rms.lat << ", "  << \
-                  gpsS.rms.long_ << ", "  <<  \
-                  gpsS.rms.counter << ", "  << \
+        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << \
+                  gpsS->rms.lat << ", "  << \
+                  gpsS->rms.long_ << ", "  <<  \
+                  gpsS->rms.counter << ", "  << \
                   uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << \
                   uwave.puwv7.Depth_m << ", "  << \
@@ -78,10 +81,10 @@ void Logger::logDirect(uWave uwave)
     {
 
         QTextStream stream (&fileDirect);
-        stream << gpsS.rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS.rms.lat << ", "  << \
-                  gpsS.rms.long_ << ", "  <<  \
-                  gpsS.rms.counter << ", "  << \
+        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << \
+                  gpsS->rms.lat << ", "  << \
+                  gpsS->rms.long_ << ", "  <<  \
+                  gpsS->rms.counter << ", "  << \
                   uwave.puwv7.Pressure_mBar << ", " << \
                   uwave.puwv7.Temperature_C << ", " << \
                   uwave.puwv7.Depth_m << ", "  << \

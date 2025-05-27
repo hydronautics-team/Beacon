@@ -6,15 +6,16 @@
 #include <QTextStream>
 #include "nmea0183.h"
 #include "hydroacoustics.h"
+#include "json_parser.h"
 
 class Logger : public QObject
 {
     Q_OBJECT
 public:
     Logger(QObject *parent = nullptr);
-    GPS gpsS;
+    NMEA::NMEA0183 *gpsS = nullptr;
 public slots:
-    void logTickGPS(GPS gps);
+    void logTickGPS(NMEA::NMEA0183 *gps);
     void logTickIdle(uWave uwave);
     void logTickRound(uWave uwave);
     void logDirect(uWave uwave);

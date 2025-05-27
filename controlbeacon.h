@@ -58,7 +58,7 @@ public:
 
 public:
     ControlBeacon(QObject *parent = nullptr);
-    NMEA0183 *gps = nullptr;
+    NMEA::NMEA0183 *gps = nullptr;
     QString state(){
         return m_state;
     }

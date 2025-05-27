@@ -9,6 +9,7 @@ CONFIG -= app_bundle
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        control.cpp \
         controlbeacon.cpp \
         hydroacoustics.cpp \
         json_parser.cpp \
@@ -21,6 +22,7 @@ SOURCES += \
 
 
 HEADERS += \
+    control.h \
     controlbeacon.h \
     hydroacoustics.h \
     json_parser.h \
