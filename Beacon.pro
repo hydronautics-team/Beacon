@@ -1,9 +1,7 @@
-QT += core network \
-    widgets
+QT += core network
 QT += serialport
-QT += core gui
 
-CONFIG += c++11 console
+CONFIG += c++17 console
 CONFIG -= app_bundle
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -18,8 +16,7 @@ SOURCES += \
         main.cpp \
         nmea0183.cpp \
         protocol/protocol_bort.cpp \
-        protocol/protocol_pc.cpp \
-        widget.cpp
+        protocol/protocol_pc.cpp
 
 
 
@@ -33,13 +30,10 @@ HEADERS += \
     protocol/protocol.h \
     protocol/protocol_bort.h \
     protocol/protocol_pc.h \
-    protocol/udp_protocol.h \
-    widget.h
+    protocol/udp_protocol.h
 
 DISTFILES +=
 
-FORMS += \
-    widget.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
