@@ -19,19 +19,19 @@ NMEA0183::NMEA0183(QString portName, int baudRate, QObject *parent)
         qDebug()<<" error open port "<< gps_port.errorString();
     }
     qDebug() << "объявление";
-    gps = new GPS;
     connect (&gps_port, &QSerialPort::readyRead, this, &NMEA0183::readData);
 
 }
 
 void NMEA0183::readData()
 {
-    gps_buffer.append(gps_port.readAll());
-//    qDebug() << gps_buffer;
-    // gps_buffer.clear();
-    parseBuffer();
-//    qDebug() <<"emit updateGPS(*gps)";
+    gps_bufferAll.append(gps_port.readAll());
+    emit updateAll(gps_bufferAll);
 
+    gps_buffer.append(gps_bufferAll);
+    gps_bufferAll.clear();
+    parseBuffer();
+    emit updateGPS(gps);
 }
 
 TitleNMEA stringToTitle(const QByteArray &tit)
@@ -109,6 +109,8 @@ void NMEA0183::parseBuffer()
 
         if(test_message) qDebug() << "gps_buffer.size:   " << gps_buffer.size();
     }
+
+    gps_buffer.clear(); //точно очищаем буфер
 }
 
 void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray &title)
@@ -145,9 +147,9 @@ void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray
 //            parseGPTXT(msg);
             break;
         case GPGGA:
-            gps->gga.count+=1;
+            gps.gga.count +=1;
             parseGPGGA(msg);
-            emit updateGPS(gps);
+//            emit updateGPS(gps);
             break;
         case GPGSA:
 //            parseGPGSA(msg);
@@ -156,16 +158,17 @@ void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray
 //            parseGPGSV(msg);
             break;
         case GPGLL:
-            gps->gll.count+=1;
+            gps.gll.count+=1;
             parseGPGLL(msg);
-            emit updateGPS(gps);
+//            emit updateGPS(gps);
         case GNGLL:
-            gps->gll.count+=1;
+            gps.gll.count+=1;
             parseGPGLL(msg);
-            emit updateGPS(gps);
+//            emit updateGPS(gps);
             break;
         case GNRMC:
-//            parseGNRMC(msg);
+            gps.rmc.count+=1;
+            parseGPRMC(msg);
             break;
         case GNVTG:
 //            parseGNVTG(msg);
@@ -174,9 +177,9 @@ void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray
 //            parseGNGSA(msg);
             break;
         case GNGGA:
-            gps->gga.count+=1;
+            gps.gga.count+=1;
             parseGPGGA(msg);
-            emit updateGPS(gps);
+//            emit updateGPS(gps);
             break;
         case GPZDA:
 //            parseGPZDA(msg);
@@ -194,9 +197,9 @@ void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray
 //            parseROT(msg);
             break;
         case PSAT:
-            gps->psat.count+=1;
-            parsePSAT(msg);
-            emit updateGPS(gps);
+//            gps.psat.count+=1;
+//            parsePSAT(msg);
+//            emit updateGPS(gps);
             break;
         case PRDCU:
 //            parsePRDCU(msg);
@@ -208,12 +211,12 @@ void NMEA0183::findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray
 //            parseGLGSA(msg);
             break;
         case GLGGA:
-            gps->gga.count+=1;
+            gps.gga.count+=1;
             parseGPGGA(msg);
-            emit updateGPS(gps);
+//            emit updateGPS(gps);
             break;
         case GLRMC:
-//            parseGLRMC(msg);
+            parseGLRMC(msg);
             break;
         case GLVTG:
 //            parseGLVTG(msg);
@@ -270,155 +273,155 @@ int NMEA0183::crc_real_method(QByteArray gps_buffer, uint crc_in)
 
 void NMEA0183::parseGPRMC(QByteArray msg)
 {
-//    int index =msg.indexOf(44);//ищем первую запятую
-//    msg.remove(0, index+1);
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.time = QTime::fromString((msg.mid(0, index-1)), "hhmmss.z");
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.status = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.status = (char)msg[0];
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.lat = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.lat = atof(msg.mid(0, index-1));
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.NS = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.NS = (char)msg[0];
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.long_ = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.long_ = atof(msg.mid(0, index-1));
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.EW = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.EW = (char)msg[0];
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.spd = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.spd = atof(msg.mid(0, index-1));
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.cog = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.cog = atof(msg.mid(0, index-1));
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-////    qDebug() << msg;
-//    if (index == 0)
-//    {
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-////        qDebug() << msg.mid(0, index);
-//        gps->rms.date = QDate::fromString((msg.mid(0, index)), "ddMMyy");
-//        msg.remove(0, index+1);
-////        qDebug() << gps->rms.date.toString();
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.mv = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.mv = atof(msg.mid(0, index-1));
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.mvEW = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.mvEW = (char)msg[0];
-//        msg.remove(0, index+1);
-//    }
-//    index =msg.indexOf(44);//ищем запятую
-//    if (index == 0)
-//    {
-//        gps->rms.posMode = 0;
-//        msg.remove(0, index+1);
-//    }
-//    if (index > 0)
-//    {
-//        gps->rms.posMode = (char)msg[0];
-//        msg.remove(0, index+1);
-//    }
-//    gps->rms.counter +=1;
-//    if(test_message)qDebug() << "gps->rms.time:    " << gps->rms.time.toString("hhmmss.z");
-//    if(test_message)qDebug() << "gps->rms.status:  " << gps->rms.status;
-//    if(test_message)qDebug() << "gps->rms.lat:     " << gps->rms.lat;
-//    if(test_message)qDebug() << "gps->rms.NS:      " << gps->rms.NS;
-//    if(test_message)qDebug() << "gps->rms.long:    " << gps->rms.long_;
-//    if(test_message)qDebug() << "gps->rms.EW:      " << gps->rms.EW;
-//    if(test_message)qDebug() << "gps->rms.spd:     " << gps->rms.spd;
-//    if(test_message)qDebug() << "gps->rms.cog:     " << gps->rms.cog;
-//    if(test_message)qDebug() << "gps->rms.date:    " << gps->rms.date.toString("dd.MM.yy");
-//    if(test_message)qDebug() << "gps->rms.mv:      " << gps->rms.mv;
-//    if(test_message)qDebug() << "gps->rms.mvEW:    " << gps->rms.mvEW;
-//    if(test_message)qDebug() << "gps->rms.posMode: " << gps->rms.posMode;
-//    if(test_message)qDebug() << "gps->rms.counter: " << gps->rms.counter;
+    int index =msg.indexOf(44);//ищем первую запятую
+        msg.remove(0, index+1);
+        index =msg.indexOf(44);//ищем запятую
+        if (index == 0)
+        {
+            msg.remove(0, index+1);
+        }
+        if (index > 0)
+        {
+            gps.rmc.time = QTime::fromString((msg.mid(0, index-1)), "hhmmss.z");
+            msg.remove(0, index+1);
+        }
+        index =msg.indexOf(44);//ищем запятую
+        if (index == 0)
+        {
+        gps.rmc.status = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.status = (char)msg[0];
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.lat = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.lat = atof(msg.mid(0, index-1));
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.NS = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.NS = (char)msg[0];
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.lon = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.lon = atof(msg.mid(0, index-1));
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.EW = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.EW = (char)msg[0];
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.speedKnots = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.speedKnots = atof(msg.mid(0, index-1));
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.course = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.course = atof(msg.mid(0, index-1));
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+//    qDebug() << msg;
+    if (index == 0)
+    {
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+//        qDebug() << msg.mid(0, index);
+        gps.rmc.date = QDate::fromString((msg.mid(0, index)), "ddMMyy");
+        msg.remove(0, index+1);
+//        qDebug() << gps.rmc.date.toString();
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.magneticVariation = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.magneticVariation = atof(msg.mid(0, index-1));
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.magneticEW = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.magneticEW = (char)msg[0];
+        msg.remove(0, index+1);
+    }
+    index =msg.indexOf(44);//ищем запятую
+    if (index == 0)
+    {
+        gps.rmc.posMode = 0;
+        msg.remove(0, index+1);
+    }
+    if (index > 0)
+    {
+        gps.rmc.posMode = (char)msg[0];
+        msg.remove(0, index+1);
+    }
+    gps.rmc.count +=1;
+    if(test_message)qDebug() << "gps.rmc.time:    " << gps.rmc.time.toString("hhmmss.z");
+    if(test_message)qDebug() << "gps.rmc.status:  " << gps.rmc.status;
+    if(test_message)qDebug() << "gps.rmc.lat:     " << gps.rmc.lat;
+    if(test_message)qDebug() << "gps.rmc.NS:      " << gps.rmc.NS;
+    if(test_message)qDebug() << "gps.rmc.long:    " << gps.rmc.lon;
+    if(test_message)qDebug() << "gps.rmc.EW:      " << gps.rmc.EW;
+    if(test_message)qDebug() << "gps.rmc.spd:     " << gps.rmc.speedKnots;
+    if(test_message)qDebug() << "gps.rmc.cog:     " << gps.rmc.course;
+    if(test_message)qDebug() << "gps.rmc.date:    " << gps.rmc.date.toString("dd.MM.yy");
+    if(test_message)qDebug() << "gps.rmc.mv:      " << gps.rmc.magneticVariation;
+    if(test_message)qDebug() << "gps.rmc.mvEW:    " << gps.rmc.magneticEW;
+    if(test_message)qDebug() << "gps.rmc.posMode: " << gps.rmc.posMode;
+    if(test_message)qDebug() << "gps.rmc.counter: " << gps.rmc.count;
 
 }
 
@@ -435,31 +438,31 @@ void NMEA0183::parseGNVTG(QByteArray msg)
 void NMEA0183::parseGPVTG(QByteArray msg)
 {
 //    int index = msg.indexOf(',');
-//    gps->vtg.trackMadeGood = atof(msg.mid(0, index));
+//    gps.vtg.trackMadeGood = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.trackMadeGoodReference = msg.mid(0, 1);
+//    gps.vtg.trackMadeGoodReference = msg.mid(0, 1);
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.speedKnots = atof(msg.mid(0, index));
+//    gps.vtg.speedKnots = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.speedKnotsUnit = msg.mid(0, 1);
+//    gps.vtg.speedKnotsUnit = msg.mid(0, 1);
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.speedKph = atof(msg.mid(0, index));
+//    gps.vtg.speedKph = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.speedKphUnit = msg.mid(0, 1);
+//    gps.vtg.speedKphUnit = msg.mid(0, 1);
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->vtg.posMode = msg.mid(0, 1);
+//    gps.vtg.posMode = msg.mid(0, 1);
 
 //    if(test_message) qDebug() << "GPVTG Parsed";
 }
@@ -472,11 +475,11 @@ void NMEA0183::parseGLVTG(QByteArray msg)
 void NMEA0183::parseGPTXT(QByteArray msg)
 {
 //    // GPTXT сообщение может содержать текстовую информацию
-//    gps->txt.id = atoi(msg.mid(0, 2));
+//    gps.txt.id = atoi(msg.mid(0, 2));
 //    msg.remove(0, 3);  // Удаляем ID и запятую
 
 //    int index = msg.indexOf(',');
-//    gps->txt.text = msg.mid(0, index);
+//    gps.txt.text = msg.mid(0, index);
 //    if(test_message)qDebug() << "GPTXT Parsed";
 }
 
@@ -487,41 +490,39 @@ void NMEA0183::parseGPGGA(QByteArray &msg)
 //    qDebug() << "parseGPGGA msg:" << msg;
     if(test_message)qDebug() << msg;
     QList list = msg.split(',');
-    gps->gga.time = QTime::fromString(list[1], "hhmmss.z");
-//    gps->gga.time = list[1].toDouble();
+    gps.gga.time = QTime::fromString(list[1], "hhmmss.z");
+//    gps.gga.time = list[1].toDouble();
     double tmp = list[2].toDouble();
     int intTmp = 0;
     if (tmp>0)
     {
         intTmp = static_cast<int>(tmp)/100;
         tmp = (tmp - 100*intTmp)/60.0;
-        gps->gga.latitude = intTmp+tmp;
+        gps.gga.latitude = intTmp+tmp;
     }
     tmp = list[4].toDouble();
     if (tmp>0)
     {
         intTmp = static_cast<int>(tmp)/100;
         tmp = (tmp - 100*intTmp)/60.0;
-        gps->gga.longitude = intTmp+tmp;
+        gps.gga.longitude = intTmp+tmp;
     }
-//    gps->gga.latitude       = list[2].toDouble();
-    if (list[3].size()>0) gps->gga.latHemisphere  = list[3][0];
-//    gps->gga.longitude      = list[4].toDouble();QString::fromUtf8(list[3])
-    if (list[5].size()>0) gps->gga.lonHemisphere  = list[5][0];
-    gps->gga.quality        = list[6].toInt();
-    gps->gga.satellitesUsed = list[7].toInt();
-    gps->gga.hdop           = list[8].toDouble();
-    gps->gga.altitude       = list[9].toDouble();
-    if (list[10].size()>0) gps->gga.altitudeUnit   = list[10][0];
-    gps->gga.geoidHeight    = list[11].toDouble();
-    if (list[12].size()>0) gps->gga.geoidUnit      = list[12][0];
-    gps->gga.dgpsAge        = list[13].toDouble();
-    gps->gga.dgpsStationId  = list[14].toInt();
+//    gps.gga.latitude       = list[2].toDouble();
+    if (list[3].size()>0) gps.gga.latHemisphere  = list[3][0];
+//    gps.gga.longitude      = list[4].toDouble();QString::fromUtf8(list[3])
+    if (list[5].size()>0) gps.gga.lonHemisphere  = list[5][0];
+    gps.gga.quality        = list[6].toInt();
+    gps.gga.satellitesUsed = list[7].toInt();
+    gps.gga.hdop           = list[8].toDouble();
+    gps.gga.altitude       = list[9].toDouble();
+    if (list[10].size()>0) gps.gga.altitudeUnit   = list[10][0];
+    gps.gga.geoidHeight    = list[11].toDouble();
+    if (list[12].size()>0) gps.gga.geoidUnit      = list[12][0];
+    gps.gga.dgpsAge        = list[13].toDouble();
+    gps.gga.dgpsStationId  = list[14].toInt();
 
 
-//    qDebug() << "gps->gga.time" <<      gps->gga.time  ;
-    qDebug() << "gps->gga.latitude" <<  QString::number(gps->gga.latitude ,'f', 16);
-    qDebug() << "gps->gga.longitude" << QString::number(gps->gga.longitude,'f', 16);
+//    qDebug() << "gps.gga.time" <<      gps.gga.time  ;
     if(test_message) qDebug() << "GPGGA Parsed";
 }
 
@@ -534,29 +535,29 @@ void NMEA0183::parseGPGSA(QByteArray msg)
 {
 //    // Парсинг GSA сообщений
 //    int index = msg.indexOf(',');
-//    gps->gsa.mode = msg.mid(0, 1);
+//    gps.gsa.mode = msg.mid(0, 1);
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->gsa.fixType = atoi(msg.mid(0, index));
+//    gps.gsa.fixType = atoi(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    for (int i = 0; i < 12; i++) {
 //        index = msg.indexOf(',');
-//        gps->gsa.satellites[i] = atoi(msg.mid(0, index));
+//        gps.gsa.satellites[i] = atoi(msg.mid(0, index));
 //        msg.remove(0, index + 1);
 //    }
 
 //    index = msg.indexOf(',');
-//    gps->gsa.pdop = atof(msg.mid(0, index));
+//    gps.gsa.pdop = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->gsa.hdop = atof(msg.mid(0, index));
+//    gps.gsa.hdop = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
 //    index = msg.indexOf(',');
-//    gps->gsa.vdop = atof(msg.mid(0, index));
+//    gps.gsa.vdop = atof(msg.mid(0, index));
 
 //    if(test_message)qDebug() << "GPGSA Parsed";
 }
@@ -574,28 +575,28 @@ void NMEA0183::parsePGRMT(QByteArray msg)
 void NMEA0183::parseGPZDA(QByteArray msg)
 {
 //    int index = msg.indexOf(',');
-//    gps->zda.time = QTime::fromString(msg.mid(0, index), "hhmmss.z");
+//    gps.zda.time = QTime::fromString(msg.mid(0, index), "hhmmss.z");
 //    msg.remove(0, index + 1);
-//    if(test_message)qDebug() << "gps->zda.time: " << gps->zda.time;
+//    if(test_message)qDebug() << "gps.zda.time: " << gps.zda.time;
 //    index = msg.indexOf(',');
-//    gps->zda.day = atoi(msg.mid(0, index));
+//    gps.zda.day = atoi(msg.mid(0, index));
 //    msg.remove(0, index + 1);
-//    if(test_message)qDebug() << "gps->zda.day: " << gps->zda.day;
+//    if(test_message)qDebug() << "gps.zda.day: " << gps.zda.day;
 //    index = msg.indexOf(',');
-//    gps->zda.month = atoi(msg.mid(0, index));
+//    gps.zda.month = atoi(msg.mid(0, index));
 //    msg.remove(0, index + 1);
-//    if(test_message)qDebug() << "gps->zda.month: " << gps->zda.month;
+//    if(test_message)qDebug() << "gps.zda.month: " << gps.zda.month;
 //    index = msg.indexOf(',');
-//    gps->zda.year = atoi(msg.mid(0, index));
+//    gps.zda.year = atoi(msg.mid(0, index));
 //    msg.remove(0, index + 1);
-//    if(test_message)qDebug() << "gps->zda.year: " << gps->zda.year;
+//    if(test_message)qDebug() << "gps.zda.year: " << gps.zda.year;
 //    index = msg.indexOf(',');
-//    gps->zda.localZoneHours = atoi(msg.mid(0, index));
+//    gps.zda.localZoneHours = atoi(msg.mid(0, index));
 //    msg.remove(0, index + 1);
-//    if(test_message)qDebug() << "gps->zda.localZoneHours: " << gps->zda.localZoneHours;
+//    if(test_message)qDebug() << "gps.zda.localZoneHours: " << gps.zda.localZoneHours;
 //    index = msg.indexOf(',');
-//    gps->zda.localZoneMinutes = atoi(msg.mid(0, index));
-//    if(test_message)qDebug() << "gps->zda.localZoneMinutes: " << gps->zda.localZoneMinutes;
+//    gps.zda.localZoneMinutes = atoi(msg.mid(0, index));
+//    if(test_message)qDebug() << "gps.zda.localZoneMinutes: " << gps.zda.localZoneMinutes;
 //    if(test_message)qDebug() << "GPZDA Parsed";
 }
 
@@ -612,38 +613,38 @@ void NMEA0183::parseGLZDA(QByteArray msg)
 void NMEA0183::parseHDT(QByteArray msg)
 {
 //    int index = msg.indexOf(',');
-//    gps->hdt.heading = atof(msg.mid(0, index));
+//    gps.hdt.heading = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
-//    gps->hdt.trueIndicator = msg.mid(0, 1);
+//    gps.hdt.trueIndicator = msg.mid(0, 1);
 //    if(test_message)qDebug() << "HDT Parsed";
 }
 
 void NMEA0183::parseROT(QByteArray msg)
 {
 //    int index = msg.indexOf(',');
-//    gps->rot.rateOfTurn = atof(msg.mid(0, index));
+//    gps.rot.rateOfTurn = atof(msg.mid(0, index));
 //    msg.remove(0, index + 1);
 
-//    gps->rot.status = msg.mid(0, 1);
+//    gps.rot.status = msg.mid(0, 1);
 //    if(test_message)qDebug() << "ROT Parsed";
 }
 
 void NMEA0183::parsePSAT(QByteArray &msg)
 {
-    // Пример сообщения: $PSAT,HPR,123519.00,182.7,0.5,-1.3,N*6D
-//    qDebug() << msg;
-    QList list = msg.split(',');
-    gps->psat.time = QTime::fromString(list[2], "hhmmss.z");
-    gps->psat.yaw   = list[3].toDouble();
-    qDebug() << "gps->psat.yaw" << gps->psat.yaw;
-    gps->psat.pitch = list[4].toDouble();
-    gps->psat.roll  = list[5].toDouble();
-//    qDebug() << "gps->psat.yaw   ==" << gps->psat.yaw   ;
-//    qDebug() << "gps->psat.pitch ==" << gps->psat.pitch ;
-//    qDebug() << "gps->psat.roll  ==" << gps->psat.roll  ;
-    if (list[6].size()>0) gps->psat.dataType = list[6][0];
-//    if(test_message) qDebug() << "PSAT Parsed";
+//    // Пример сообщения: $PSAT,HPR,123519.00,182.7,0.5,-1.3,N*6D
+////    qDebug() << msg;
+//    QList list = msg.split(',');
+//    gps.psat.time = QTime::fromString(list[2], "hhmmss.z");
+//    gps.psat.yaw   = list[3].toDouble();
+//    qDebug() << "gps.psat.yaw" << gps.psat.yaw;
+//    gps.psat.pitch = list[4].toDouble();
+//    gps.psat.roll  = list[5].toDouble();
+////    qDebug() << "gps.psat.yaw   ==" << gps.psat.yaw   ;
+////    qDebug() << "gps.psat.pitch ==" << gps.psat.pitch ;
+////    qDebug() << "gps.psat.roll  ==" << gps.psat.roll  ;
+//    if (list[6].size()>0) gps.psat.dataType = list[6][0];
+////    if(test_message) qDebug() << "PSAT Parsed";
 }
 
 
@@ -672,23 +673,23 @@ void NMEA0183::parseGPGLL(QByteArray &msg)
 {
     if(test_message)qDebug() << msg;
     QList list = msg.split(',');
-    gps->gll.lat = list[1].toDouble();
-    if (list[2].size()>0) gps->gll.NS = QString::fromUtf8(list[2]);
-    gps->gll.long_ = list[3].toDouble();
-    if (list[4].size()>0) gps->gll.EW = QString::fromUtf8(list[4]);
-    gps->gll.time = QTime::fromString(list[5], "hhmmss.z");
-    if (list[6].size()>0) gps->gll.status = QString::fromUtf8(list[6]);
-    if (list[7].size()>0) gps->gll.posMode = QString::fromUtf8(list[7]);
+    gps.gll.lat = list[1].toDouble();
+    if (list[2].size()>0) gps.gll.NS = QString::fromUtf8(list[2]);
+    gps.gll.long_ = list[3].toDouble();
+    if (list[4].size()>0) gps.gll.EW = QString::fromUtf8(list[4]);
+    gps.gll.time = QTime::fromString(list[5], "hhmmss.z");
+    if (list[6].size()>0) gps.gll.status = QString::fromUtf8(list[6]);
+    if (list[7].size()>0) gps.gll.posMode = QString::fromUtf8(list[7]);
 
-    if(test_message)qDebug() << "gps->gll.lat:       " << gps->gll.lat;
-    if(test_message)qDebug() << "gps->gll.NS:        " << gps->gll.NS;
-    if(test_message)qDebug() << "gps->gll.long_:     " << gps->gll.long_;
-    if(test_message)qDebug() << "gps->gll.EW:        " << gps->gll.EW;
-//      qDebug() << "gps->gll.time:      " << gps->gll.time_h << ":" << gps->gll.time_m << ":" \
-//               << gps->gll.time_s << ":" << gps->gll.time_ms;
-    if(test_message)qDebug() << "gps->gll.time:      " << gps->gll.time;
-    if(test_message)qDebug() << "gps->gll.status:    " << gps->gll.status;
-    if(test_message)qDebug() << "gps->gll.posMode:   " << gps->gll.posMode;
+    if(test_message)qDebug() << "gps.gll.lat:       " << gps.gll.lat;
+    if(test_message)qDebug() << "gps.gll.NS:        " << gps.gll.NS;
+    if(test_message)qDebug() << "gps.gll.long_:     " << gps.gll.long_;
+    if(test_message)qDebug() << "gps.gll.EW:        " << gps.gll.EW;
+//      qDebug() << "gps.gll.time:      " << gps.gll.time_h << ":" << gps.gll.time_m << ":" \
+//               << gps.gll.time_s << ":" << gps.gll.time_ms;
+    if(test_message)qDebug() << "gps.gll.time:      " << gps.gll.time;
+    if(test_message)qDebug() << "gps.gll.status:    " << gps.gll.status;
+    if(test_message)qDebug() << "gps.gll.posMode:   " << gps.gll.posMode;
 }
 
 } //end namespace NMEA

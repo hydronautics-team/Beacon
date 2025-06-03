@@ -1,6 +1,6 @@
 {
-	"COM_GPS" : "COM12",
-	"COM_HYDRO" : "COM3",
+	"COM_GPS" : "ttyACM0",
+	"COM_HYDRO" : "ttyUSB0",
 	"PUWV1" : "$PUWV1,0,1,0.,1,1,9.8067*34\r\n",
 	"receiver.ip" : "127.0.0.1",
 	"receiver_port" : 13050,

@@ -17,8 +17,6 @@
 
 namespace NMEA {
 
-#pragma pack(push,1)
-
 enum TitleNMEA
 {
     GNGGA = 1,  ///<  GNSS fix data
@@ -72,7 +70,7 @@ struct stPSAT
     uint16_t count = 0;
 };
 
-struct RMS
+struct rmc
 {
     QTime time;
     char status = 0;
@@ -105,22 +103,23 @@ struct GGA
     char geoidUnit= 'Z';    // Единица измерения превышения геоида (м)
     double dgpsAge = 0;       // Возраст дифференциальной поправки
     int dgpsStationId = 0;    // Идентификатор ККС
-    uint16_t count = 0;
+    qint16 count = 0;
 };
 
 struct RMC {
     QTime time;          // Время GPS (UTC)
-    QString status;      // Статус (A = активный, V = неактивный)
+    char status;      // Статус (A = активный, V = неактивный)
     double lat;          // Широта
-    QString NS;          // Север/Юг
+    char NS;          // Север/Юг
     double lon;          // Долгота
-    QString EW;          // Восток/Запад
+    char EW;          // Восток/Запад
     double speedKnots;   // Скорость в узлах
     double course;       // Направление
     QDate date;          // Дата
     double magneticVariation; // Магнитное отклонение
-    QString magneticEW;  // Восток/Запад магнитного отклонения
-    QString posMode;     // Режим определения позиции
+    char magneticEW;  // Восток/Запад магнитного отклонения
+    char posMode;     // Режим определения позиции
+    qint16 count = 0;
 };
 
 struct VTG {
@@ -181,19 +180,16 @@ struct GPSData {
 struct GPS
 {
     GLL gll;
-    RMS rms;
     GGA gga;
-//    RMC rmc;
+    RMC rmc;
 //    VTG vtg;
 //    GSA gsa;
 //    ZDA zda;
 //    stHDT hdt;
 //    stROT rot;
 //    TXT txt;
-    stPSAT psat;
+//    stPSAT psat;
 };
-
-#pragma pack(pop)
 
 //Q_DECLARE_METATYPE(GPS*)
 //Q_DECLA
@@ -204,12 +200,13 @@ class NMEA0183 : public QObject
 public:
     explicit NMEA0183(QString portName, int baudRate = 115200, QObject *parent = 0);
     void readData();
-    GPS *gps;
+    GPS gps;
 protected:
     QFile fileGPS;
     void findTitleNMEA(qint8 &index, qint8 &crc_in, qint8 &end, QByteArray &title); //поиск заголовка
     QSerialPort gps_port;
     QByteArray gps_buffer;
+    QByteArray gps_bufferAll;
     void parseBuffer();
     void parseGNGGA(QByteArray msg);
     void parseGPGGA(QByteArray &msg);
@@ -241,7 +238,8 @@ protected:
     bool test_message = false;
     QTimer timer;
 signals:
-    void updateGPS(GPS* gpsData);
+    void updateGPS(GPS &gpsData);
+    void updateAll(const QByteArray &data);
 
 
 };

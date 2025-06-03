@@ -13,29 +13,24 @@ class Logger : public QObject
     Q_OBJECT
 public:
     Logger(QObject *parent = nullptr);
-    NMEA::NMEA0183 *gpsS = nullptr;
+    NMEA::GPS gpsS;
+
+    quint16 countGLL = 0;
+    quint16 countRMC = 0;
+    quint16 countGGA = 0;
 public slots:
-    void logTickGPS(NMEA::NMEA0183 *gps);
-    void logTickIdle(uWave uwave);
-    void logTickRound(uWave uwave);
-    void logDirect(uWave uwave);
+    void logTickGPS(NMEA::GPS &gps_);
+    void logTickAll(const QByteArray &gps_data);
     void logStartGPS();
-    void logStartIdle();
-    void logStartRoundR();
-    void logStartDirect();
     void logStopGPS();
-    void logStopIdle();
-    void logStopRoundR();
-    void logStopDirect();
+    void logStartAll();
+    void logStopAll();
 protected:
     bool writeLogGPS = false;
-    bool writeLogIdle = false;
-    bool writelogRoundR = false;
-    bool writelogDirect = false;
+    bool writeLogAll = false;
+    bool updateGPS = false;
     QFile fileGPS;
-    QFile fileIdle;
-    QFile fileRound;
-    QFile fileDirect;
+    QFile fileAll;
 };
 
 #endif // LOGGER_H

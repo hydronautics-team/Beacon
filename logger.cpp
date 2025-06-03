@@ -4,114 +4,61 @@
 
 Logger::Logger(QObject *parent) : QObject{parent}
 {
-    Json_parser js;
-    gpsS = new NMEA::NMEA0183 (js.set.comGPS);
+//    Json_parser js;
+//    gpsS = new NMEA::NMEA0183 (js.set.comGPS);
+    logStartAll();
+    logStartGPS();
 }
 
-void Logger::logTickGPS(NMEA::NMEA0183* gps)
+void Logger::logTickGPS(NMEA::GPS &gps_)
 {
     if (writeLogGPS)
     {
-        gpsS = gps;
-        QTextStream stream (&fileGPS);
-//        stream << gps->gll.lat << ", " << gps->gll.NS << ", " << gps->gll.long_ << ", " << gps->gll.EW << ", " << \
-//                  gps->gll.time.toString("hh:mm:ss.z") << ", " << gps->gll.status << ", " << gps->gll.posMode << "\n";
+        gpsS = gps_;
 
-        stream << gps->rms.time.toString("hh:mm:ss.z") << ", " << gps->rms.status << ", " << gps->rms.lat << ", " << gps->rms.NS << ", " << \
-                  gps->rms.long_ << ", " << gps->rms.EW << ", " << gps->rms.spd << ", " << gps->rms.cog << ", " <<\
-                  gps->rms.date.toString("dd.MM.yy") << ", " << gps->rms.mv << ", " << gps->rms.mvEW << ", " << gps->rms.posMode << ", " << gps->rms.counter <<  "\n";
+        if (countGGA != gpsS.gga.count)
+        {
+            countGGA = gpsS.gga.count;
+            updateGPS = true;
+        }
+        if (countGLL != gpsS.gll.count)
+        {
+            countGLL = gpsS.gll.count;
+            updateGPS = true;
+        }
+        if (countRMC != gpsS.rmc.count)
+        {
+            countRMC = gpsS.rmc.count;
+            updateGPS = true;
+        }
+        if (updateGPS)
+        {
+            QTextStream stream (&fileGPS);
+            stream << gpsS.gll.lat << ", " << gpsS.gll.NS << ", " << gpsS.gll.long_ << ", " << gpsS.gll.EW << ", " <<
+                      gpsS.gll.time.toString("hh:mm:ss.z") << ", " << gpsS.gll.status << ", " << gpsS.gll.posMode << ", " << gpsS.gll.count << ", ";
+
+            stream << gpsS.rmc.time.toString("hh:mm:ss.z") << ", " << gpsS.rmc.status << ", " << gpsS.rmc.lat << ", " << gpsS.rmc.NS << ", " <<
+                      gpsS.rmc.lon << ", " << gpsS.rmc.EW << ", " << gpsS.rmc.speedKnots << ", " << gpsS.rmc.course << ", " <<
+                      gpsS.rmc.date.toString("dd.MM.yy") << ", " << gpsS.rmc.magneticVariation << ", " << gpsS.rmc.magneticEW << ", " <<
+                      gpsS.rmc.posMode << ", " << gpsS.rmc.count << ", ";
+
+            stream << gpsS.gga.time.toString("hh:mm:ss.z") << ", " << gpsS.gga.latitude << ", " << gpsS.gga.latHemisphere << ", " <<
+                      gpsS.gga.longitude << ", " << gpsS.gga.lonHemisphere << ", " << gpsS.gga.quality << ", " << gpsS.gga.satellitesUsed << ", " <<
+                      gpsS.gga.hdop << ", " << gpsS.gga.altitude << ", " << gpsS.gga.altitudeUnit << ", " << gpsS.gga.geoidHeight << ", " <<
+                      gpsS.gga.geoidUnit << ", " << gpsS.gga.dgpsAge << ", " << gpsS.gga.dgpsStationId << ", " << gpsS.gga.count << "\n";
+            updateGPS = false;
+        }
+
+
     }
 }
 
-void Logger::logTickIdle(uWave uwave)
+void Logger::logTickAll(const QByteArray &gps_data)
 {
-    if(writeLogIdle)
+    if (writeLogAll)
     {
-        QTextStream stream (&fileIdle);
-        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << gpsS->rms.lat << ", "  << gpsS->rms.NS << ", " << \
-                  gpsS->rms.long_ << ", " << gpsS->rms.EW << ", " <<  gpsS->rms.counter << ", "  << uwave.puwv7.Pressure_mBar << ", " << \
-                  uwave.puwv7.Temperature_C << ", " << uwave.puwv7.Depth_m << ", "  << uwave.puwv7.VCC_V << ", "  << uwave.puwv0.errCode << ", " <<\
-                  uwave.counterACK << "\n";
-    }
-}
-
-void Logger::logTickRound(uWave uwave)
-{
-    if(writelogRoundR)
-    {
-
-        QTextStream stream (&fileRound);
-        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS->rms.lat << ", "  << \
-                  gpsS->rms.long_ << ", "  <<  \
-                  gpsS->rms.counter << ", "  << \
-                  uwave.puwv7.Pressure_mBar << ", " << \
-                  uwave.puwv7.Temperature_C << ", " << \
-                  uwave.puwv7.Depth_m << ", "  << \
-                  uwave.puwv7.VCC_V << ", "  << \
-                  uwave.puwv0.errCode << ", " <<\
-                  uwave.puwv3.counter << ", " << \
-                  uwave.puwv3.counterID1 << ", " << \
-                  uwave.puwv3.counterID2 << ", " << \
-                  uwave.puwv3.counterID3 << ", " << \
-                  uwave.puwv3.counterID4 << ", " << \
-                  uwave.puwv3.counterAll << ", " << \
-                  uwave.puwv3.txChID <<", " << \
-                  uwave.puwv3.propTime << ", " << \
-                  uwave.puwv3.distance << ", " << \
-                  uwave.puwv3.distanceID1 << ", " << \
-                  uwave.puwv3.distanceID2 << ", " << \
-                  uwave.puwv3.distanceID3 << ", " << \
-                  uwave.puwv3.distanceID4 << ", " << \
-                  uwave.puwv3.MSR << ", " << \
-                  uwave.puwv4.counter << ", " << \
-                  uwave.puwv4.counterID1  << ", " << \
-                  uwave.puwv4.counterID2  << ", " << \
-                  uwave.puwv4.counterID3  << ", " << \
-                  uwave.puwv4.counterID4  << ", " << \
-                  uwave.puwv4.counterAll  << ", " << \
-                  uwave.counterACK \
-                  <<"\n";
-    }
-}
-
-void Logger::logDirect(uWave uwave)
-{
-    if(writelogDirect)
-    {
-
-        QTextStream stream (&fileDirect);
-        stream << gpsS->rms.time.toString("hh:mm:ss.z") << ", " << \
-                  gpsS->rms.lat << ", "  << \
-                  gpsS->rms.long_ << ", "  <<  \
-                  gpsS->rms.counter << ", "  << \
-                  uwave.puwv7.Pressure_mBar << ", " << \
-                  uwave.puwv7.Temperature_C << ", " << \
-                  uwave.puwv7.Depth_m << ", "  << \
-                  uwave.puwv7.VCC_V << ", "  << \
-                  uwave.puwv0.errCode << ", " <<\
-                  uwave.puwv3.counter << ", " << \
-                  uwave.puwv3.counterID1 << ", " << \
-                  uwave.puwv3.counterID2 << ", " << \
-                  uwave.puwv3.counterID3 << ", " << \
-                  uwave.puwv3.counterID4 << ", " << \
-                  uwave.puwv3.counterAll << ", " << \
-                  uwave.puwv3.txChID <<", " << \
-                  uwave.puwv3.propTime << ", " << \
-                  uwave.puwv3.distance << ", " << \
-                  uwave.puwv3.distanceID1 << ", " << \
-                  uwave.puwv3.distanceID2 << ", " << \
-                  uwave.puwv3.distanceID3 << ", " << \
-                  uwave.puwv3.distanceID4 << ", " << \
-                  uwave.puwv3.MSR << ", " << \
-                  uwave.puwv4.counter << ", " << \
-                  uwave.puwv4.counterID1  << ", " << \
-                  uwave.puwv4.counterID2  << ", " << \
-                  uwave.puwv4.counterID3  << ", " << \
-                  uwave.puwv4.counterID4  << ", " << \
-                  uwave.puwv4.counterAll  << ", " << \
-                  uwave.counterACK \
-                  <<"\n";
+        QTextStream stream (&fileAll);
+        stream << gps_data << "\n";
     }
 }
 
@@ -120,7 +67,7 @@ void Logger::logStartGPS()
     if (writeLogGPS == false)
     {
         QString fileGPSName = QString("logGPS-")+QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
-                +QTime::currentTime().toString("hh-mm-ss")+".txt";
+                +QTime::currentTime().toString("hh-mm-ss")+".csv";
         qDebug()<<fileGPSName;
         fileGPS.setFileName(fileGPSName);
 
@@ -134,79 +81,32 @@ void Logger::logStartGPS()
             qDebug()<< fileGPS.errorString() << " " << fileGPS.error();
         }
         QTextStream stream(&fileGPS);
-//        stream << "lat, NS, long, EW, time, status, posMode\n";
-        stream << "time, status, lat, NS, long, EW, spd, cog, date, mv, mvEW, posMode, counter\n";
-
+        stream << "gll.lat, gll.NS, gll.long, gll.EW, gll.time, gll.status, gll.posMode, gll.count, ";
+        stream << "rmc.time, rmc.status, rmc.lat, rmc.NS, rmc.lon, rmc.EW, rmc.speedKnots, rmc.course, rmc.date, rmc.magneticVariation, rmc.magneticEW, rmc.posMode, rmc.count, ";
+        stream << "gga.time, gga.latitude, gga.latHemisphere, gga.longitude, gga.lonHemisphere, gga.quality, gga.satellitesUsed, gga.hdop, gga.altitude, gga.altitudeUnit, gga.geoidHeight, gga.geoidUnit, gga.dgpsAge, gga.dgpsStationId, gga.count\n";
     }
 }
 
-void Logger::logStartIdle()
+void Logger::logStartAll()
 {
-    if (writeLogIdle == false)
+    if (writeLogAll == false)
     {
-        QString fileIdleName =QString("logIdle-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
-                +QTime::currentTime().toString("hh-mm-ss")+".txt";
-        qDebug()<<fileIdleName;
-        fileIdle.setFileName(fileIdleName);
-        if (fileIdle.open(QIODevice::ReadWrite | QIODevice::Text))
+        QString fileAllName = QString("logAll-")+QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
+                +QTime::currentTime().toString("hh-mm-ss")+".csv";
+        qDebug()<<fileAllName;
+        fileAll.setFileName(fileAllName);
+
+        if (fileAll.open(QIODevice::ReadWrite | QIODevice::Text))
         {
-            qDebug()<<"fileIdle is opened";
-            writeLogIdle = true;
+            qDebug()<<"fileAll is opened";
+            writeLogAll = true;
         }
         else
         {
-            qDebug()<< fileIdle.errorString() << " " << fileIdle.error();
+            qDebug()<< fileAll.errorString() << " " << fileAll.error();
         }
-        QTextStream stream(&fileIdle);
-         stream << "time, lat, NS, long, EW, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counterACK\n";
     }
 }
-
-void Logger::logStartRoundR()
-{
-    if (writelogRoundR == false)
-    {
-        QString fileRoundName =QString("logRoundR-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
-                +QTime::currentTime().toString("hh-mm-ss")+".txt";
-        qDebug()<<fileRoundName;
-        fileRound.setFileName(fileRoundName);
-        if (fileRound.open(QIODevice::ReadWrite | QIODevice::Text))
-        {
-            qDebug()<<"fileRound is opened";
-            writelogRoundR = true;
-        }
-        else
-        {
-            qDebug()<< fileRound.errorString() << " " << fileRound.error();
-        }
-        QTextStream stream(&fileRound);
-         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK\n";
-    }
-}
-
-
-void Logger::logStartDirect()
-{
-    if (writelogDirect == false)
-    {
-        QString fileDirectName =QString("logDirect-")+ QSysInfo::machineHostName()+QString("-")+QDate::currentDate().toString("yy-MM-dd")+QString("-") \
-                +QTime::currentTime().toString("hh-mm-ss")+".txt";
-        qDebug()<<fileDirectName;
-        fileDirect.setFileName(fileDirectName);
-        if (fileDirect.open(QIODevice::ReadWrite | QIODevice::Text))
-        {
-            qDebug()<<"fileDirect is opened";
-            writelogDirect = true;
-        }
-        else
-        {
-            qDebug()<< fileDirect.errorString() << " " << fileDirect.error();
-        }
-        QTextStream stream(&fileDirect);
-         stream << "time, lat, long, counter, Pressure_mBar, Temperature_C, Depth_m, VCC_V, ErrorCode, counter, counterID1, counterID2, counterID3, counterID4, counterAll, txChID, propTime, distance, distanceID1, distanceID2, distanceID3, distanceID4, MSR, TIMEOUT_counter, TIMEOUT_counterID1, TIMEOUT_counterID2, TIMEOUT_counterID3, TIMEOUT_counterID4, TIMEOUT_counterAll, uwave.counterACK\n";
-    }
-}
-
 
 void Logger::logStopGPS()
 {
@@ -217,30 +117,12 @@ void Logger::logStopGPS()
     }
 }
 
-void Logger::logStopIdle()
+void Logger::logStopAll()
 {
-    if (writeLogIdle == true)
+    if (writeLogAll == true)
     {
-        writeLogIdle = false;
-        fileIdle.close();
-        qDebug() << "fileIdle.close";
-    }
-}
-
-void Logger::logStopRoundR()
-{
-    if (writelogRoundR == true)
-    {
-        writelogRoundR = false;
-        fileRound.close();
-    }
-}
-
-void Logger::logStopDirect()
-{
-    if (writelogDirect == true)
-    {
-        writelogDirect = false;
-        fileDirect.close();
+        writeLogAll = false;
+        fileAll.close();
+        qDebug() << "fileAll.close";
     }
 }

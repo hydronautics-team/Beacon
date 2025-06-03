@@ -21,7 +21,7 @@ public:
 
     NMEA::NMEA0183 *gps = nullptr;
     Hydroacoustics *hydro = nullptr;
-    Logger logger;
+    Logger *logger = nullptr;
 
 signals:
 

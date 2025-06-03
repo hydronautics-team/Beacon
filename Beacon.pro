@@ -1,4 +1,4 @@
-QT += core network
+QT += core
 QT += serialport
 
 CONFIG += c++17 console
@@ -10,29 +10,20 @@ CONFIG -= app_bundle
 
 SOURCES += \
         control.cpp \
-        controlbeacon.cpp \
         hydroacoustics.cpp \
         json_parser.cpp \
         logger.cpp \
         main.cpp \
-        nmea0183.cpp \
-        protocol/protocol_bort.cpp \
-        protocol/protocol_pc.cpp
+        nmea0183.cpp
 
 
 
 HEADERS += \
     control.h \
-    controlbeacon.h \
     hydroacoustics.h \
     json_parser.h \
     logger.h \
-    nmea0183.h \
-    protocol/pc_protocol.h \
-    protocol/protocol.h \
-    protocol/protocol_bort.h \
-    protocol/protocol_pc.h \
-    protocol/udp_protocol.h
+    nmea0183.h
 
 DISTFILES +=
 

@@ -10,7 +10,6 @@ Hydroacoustics::Hydroacoustics(QString portName, int baudRate,
     ha.setStopBits(QSerialPort::OneStop);
     ha.setParity(QSerialPort::NoParity);
     ha.setFlowControl(QSerialPort::NoFlowControl);
-    ha.open(QIODevice::ReadWrite);
 
     if (ha.open(QIODevice::ReadWrite)){
         qDebug()<<" port was opened";
